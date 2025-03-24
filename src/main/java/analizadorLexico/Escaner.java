@@ -3,6 +3,8 @@ package analizadorLexico;
 import java.util.ArrayList;
 import java.util.List;
 
+import static analizadorLexico.TokenType.END;
+
 public class Escaner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
@@ -23,7 +25,7 @@ public class Escaner {
             scanTokens();
         }
 
-        tokens.add(new Token(END, "", null, line));
+        tokens.add(new Token(END, "", null, current, line));
         return tokens;
 
     }
@@ -39,8 +41,19 @@ public class Escaner {
         }
     }
 
+    //Avanza al proximo caracter
     private char advance(){
         return source.charAt(current++);
+    }
+
+    //agrega un token sin literal
+    private void addToken(TokenType type){
+        addToken(type,null);
+    }
+    //agrega un token
+    private void addToken(TokenType type, Object literal){
+        String text = source.substring(start,current);
+        tokens.add(new Token(type,text,literal,line,start));
     }
 
 
