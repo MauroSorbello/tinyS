@@ -33,15 +33,24 @@ public class Escaner {
         return current >= source.length();
     }
 
-    private void scanToken(){
-        char c = advance();
-        switch (c){
-
-        }
-    }
-
     private char advance(){
         return source.charAt(current++);
+    }
+
+    private void scanToken() {
+        char c = advance();
+        switch (c){
+            case '(': addToken(LEFT_PAREN);
+            case ')': addToken(RIGHT_PAREN);
+            case ',': addToken(COMMA);
+            case '.': addToken(DOT);
+            case '*': addToken(PLUS);
+            case ';': addToken(SEMICOLON);
+            case '{': addToken(LEFT_BRACE);
+            case '}': addToken(RIGHT_BRACE);
+            case '[': addToken(LEFT_BRACKET);
+            case ']': addToken(RIGHT_BRACKET);
+        }
     }
 
 }
