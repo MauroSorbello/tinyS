@@ -1,4 +1,5 @@
 package analizadorLexico;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,17 +25,13 @@ public class Escaner {
             scanTokens();
         }
 
-        tokens.add(new Token(END, "", null, line));
+        tokens.add(new Token(END, "", null, current, line));
         return tokens;
 
     }
 
     private boolean isAtEnd(){
         return current >= source.length();
-    }
-
-    private char advance(){
-        return source.charAt(current++);
     }
 
     private void scanToken() {
@@ -52,5 +49,23 @@ public class Escaner {
             case ']': addToken(RIGHT_BRACKET);
         }
     }
+
+    //Avanza al proximo caracter
+    private char advance(){
+        return source.charAt(current++);
+    }
+
+    //agrega un token sin literal
+    private void addToken(TokenType type){
+        addToken(type,null);
+    }
+    //agrega un token
+    private void addToken(TokenType type, Object literal){
+        String text = source.substring(start,current);
+        tokens.add(new Token(type,text,literal,line,start));
+    }
+
+
+
 
 }
