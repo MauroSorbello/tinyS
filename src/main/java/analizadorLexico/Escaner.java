@@ -1,7 +1,8 @@
 package analizadorLexico;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static analizadorLexico.TokenType.*;
 
 public class Escaner {
     private final String source;
@@ -42,8 +43,5 @@ public class Escaner {
     private char advance(){
         return source.charAt(current++);
     }
-
-
-
 
 }
