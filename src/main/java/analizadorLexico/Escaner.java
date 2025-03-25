@@ -139,7 +139,12 @@ public class Escaner {
         if (isDigit(c)){
             number();
         } else{
-            //Lox.error(line, "Caracter inesperado");
+            if (isAlpha(c)){
+                identifier(c);
+            } /*else{
+                Lox.error(line, "Caracter inesperado");
+             }*/
+
         }
 
     }
@@ -177,7 +182,7 @@ public class Escaner {
      * Processes a string literal enclosed in double quotes from the source code.
      * The method identifies the start and end of a string literal and handles
      * potential errors related to invalid or unclosed string definitions.
-     *
+     * <p>
      * Behavior:
      * - Iterates through characters within a string literal, ensuring it ends
      *   with a closing double-quote.
@@ -187,11 +192,11 @@ public class Escaner {
      *   string, an error is reported.
      * - On proper closure, extracts the string value, removes surrounding quotes,
      *   and creates a corresponding string token.
-     *
+     * <p>
      * Preconditions:
      * - Called when encountering a '"' character from the source code during
      *   scanning.
-     *
+     * <p>
      * Postconditions:
      * - If successfully parsed, adds a `STRING` token with its extracted value
      *   to the token collection.
@@ -262,12 +267,22 @@ public class Escaner {
                 c == '_';
     }
 
-    private void identifier() {
+    private void identifier(char c) {
+        boolean identificadorTipo = isAlphaCapital(c);
 
         while (isAlphaNumeric(look())){
             advance();
         }
-        addToken(IDENTIFIER);
+        String text = source.substring(start,current);
+        if (keywords.containsKey(text)){
+            addToken(keywords.get(text));
+        }else{
+            if (identificadorTipo){
+                addToken(CLASS,text);
+            }else{
+                addToken(OBJETS,text);
+            }
+        }
     }
 
 

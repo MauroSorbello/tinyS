@@ -2,7 +2,8 @@ package analizadorLexico;
 
 public enum TokenType {
     //Identificadores
-    IDENTIFIER, CLASS, OBJETS,
+    //IDENTIFIER, no estamos seguros
+    CLASS, OBJETS,
 
     //Literales
     INTEGER, DOUBLE, STRING, NIL,
