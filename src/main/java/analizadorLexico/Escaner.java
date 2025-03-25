@@ -3,7 +3,7 @@ package analizadorLexico;
 import java.util.ArrayList;
 import java.util.List;
 
-import static analizadorLexico.TokenType.END;
+import static analizadorLexico.TokenType.*;
 
 public class Escaner {
     private final String source;
@@ -34,10 +34,19 @@ public class Escaner {
         return current >= source.length();
     }
 
-    private void scanToken(){
+    private void scanToken() {
         char c = advance();
         switch (c){
-
+            case '(': addToken(LEFT_PAREN);
+            case ')': addToken(RIGHT_PAREN);
+            case ',': addToken(COMMA);
+            case '.': addToken(DOT);
+            case '*': addToken(PLUS);
+            case ';': addToken(SEMICOLON);
+            case '{': addToken(LEFT_BRACE);
+            case '}': addToken(RIGHT_BRACE);
+            case '[': addToken(LEFT_BRACKET);
+            case ']': addToken(RIGHT_BRACKET);
         }
     }
 
