@@ -10,6 +10,7 @@ import static analizadorLexico.TokenType.*;
 public class Escaner {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
+    ErrorLex error = new ErrorLex();
 
     private int start = 0;
     private int current = 0;
@@ -141,9 +142,9 @@ public class Escaner {
         } else{
             if (isAlpha(c)){
                 identifier(c);
-            } /*else{
-                Lox.error(line, "Caracter inesperado");
-             }*/
+            } else{
+                ErrorLex.errorDec(line, current, "CARACTER INVALIDO", String.valueOf(c));
+             }
 
         }
 
@@ -210,7 +211,7 @@ public class Escaner {
             advance();
         }
         if (isAtEnd()) {
-            //Lox.error(line, "string sin terminar");
+            ErrorLex.errorDec(line, current, "STRING SIN TERMINAR", source.substring(start + 1, current - 1));
             return;
         }
 
@@ -229,10 +230,19 @@ public class Escaner {
         while (isDigit(look())) advance();
 
         //Buscar la parte decimal
-        if(look() == '.' && isDigit(lookNext())){
-            advance();
-            isDouble = true;
+
+        if(look() == '.'){
+            if (isDigit(lookNext())) {
+                advance();
+                isDouble = true;
+            }else {
+                ErrorLex.errorDec(line, current, "DOUBLE INVALID", source.substring(start + 1, current - 1));
+            }
         }
+        if(isAlpha(look())) {
+            ErrorLex.errorDec(line, current, "CARACTER INVALIDO", source.substring(start + 1, current - 1));
+        }
+
         while (isDigit(look())) advance();
         if (isDouble){
             addToken(DOUBLE, Double.parseDouble(source.substring(start,current)));
