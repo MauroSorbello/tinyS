@@ -8,12 +8,15 @@ import java.util.Map;
 import static analizadorLexico.TokenType.*;
 
 public class Escaner {
-    private final String source;
+    private String source;
     private final List<Token> tokens = new ArrayList<>();
+    ErrorLex error = new ErrorLex();
+    private LectorCF lectorCF;
 
     private int start = 0;
     private int current = 0;
     private int line = 0;
+    private int column = 0;
 
     private static final Map<String, TokenType> keywords;
 
@@ -35,6 +38,7 @@ public class Escaner {
         keywords.put("impl", IMPL);
         keywords.put("st", ST);
         keywords.put("div", DIV);
+        keywords.put("€",END);
     }
 
     Escaner(String source) {
@@ -49,13 +53,14 @@ public class Escaner {
             scanTokens();
         }
 
-        tokens.add(new Token(END, "", null, current, line));
+        tokens.add(new Token(END, "", null, column, line));
         return tokens;
 
     }
 
     private boolean isAtEnd(){
-        return current >= source.length();
+        //return current >= source.length();
+        return source.charAt(current + 1) == '€';
     }
 
     private void scanToken() {
@@ -141,9 +146,9 @@ public class Escaner {
         } else{
             if (isAlpha(c)){
                 identifier(c);
-            } /*else{
-                Lox.error(line, "Caracter inesperado");
-             }*/
+            } else{
+                ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+             }
 
         }
 
@@ -151,13 +156,19 @@ public class Escaner {
 
     //Avanza al proximo caracter
     private char advance(){
+        if (isAtEnd()) return '€';
+        if (column >= source.length()){
+            source=lectorCF.rechargeBuffer();
+            current=0;
+        }
+        column++;
         return source.charAt(current++);
 
     }
 
     //miramos el siguiente sin consumirlo
     private char look() {
-        if (isAtEnd()) return '\0';
+        if (isAtEnd()) return '€';
         return source.charAt(current);
     }
 
@@ -168,13 +179,13 @@ public class Escaner {
     //agrega un token
     private void addToken(TokenType type, Object literal){
         String text = source.substring(start,current);
-        tokens.add(new Token(type,text,literal,line,start));
+        tokens.add(new Token(type,text,literal,line,column));
     }
 
     private boolean nextMatch(char expected){
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
-
+        column++;
         current++;
         return true;
     }
@@ -210,7 +221,7 @@ public class Escaner {
             advance();
         }
         if (isAtEnd()) {
-            //Lox.error(line, "string sin terminar");
+            ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", source.substring(start + 1, current - 1));
             return;
         }
 
@@ -229,10 +240,19 @@ public class Escaner {
         while (isDigit(look())) advance();
 
         //Buscar la parte decimal
-        if(look() == '.' && isDigit(lookNext())){
-            advance();
-            isDouble = true;
+
+        if(look() == '.'){
+            if (isDigit(lookNext())) {
+                advance();
+                isDouble = true;
+            }else {
+                ErrorLex.errorDec(line, column, "DOUBLE INVALID", source.substring(start + 1, current - 1));
+            }
         }
+        if(isAlpha(look())) {
+            ErrorLex.errorDec(line, column, "CARACTER INVALIDO", source.substring(start + 1, current - 1));
+        }
+
         while (isDigit(look())) advance();
         if (isDouble){
             addToken(DOUBLE, Double.parseDouble(source.substring(start,current)));
@@ -244,7 +264,7 @@ public class Escaner {
     }
 
     private char lookNext(){
-        if(isAtEnd()) return '\0';
+        if(isAtEnd()) return '€';
         return source.charAt(current+1);
     }
 
