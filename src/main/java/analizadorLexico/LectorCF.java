@@ -9,6 +9,9 @@ import java.util.List;
 
 
 public class LectorCF {
+
+    private int current=0;
+
     public static void main(String[] args) {
         if (args.length != 1) {
             System.err.println("Uso: java LectorCF <archivo>");
@@ -47,5 +50,16 @@ public class LectorCF {
         for (Token token : tokens) {
             System.out.println(token);
         }
+    }
+
+    private static void setPath(String path){
+        LectorCF.path = path;
+    }
+    private static String getPath(){
+        return LectorCF.path;
+    }
+
+    public String rechargeBuffer(){
+        return "";
     }
 }
