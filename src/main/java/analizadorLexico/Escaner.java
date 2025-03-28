@@ -1,5 +1,6 @@
 package analizadorLexico;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +64,7 @@ public class Escaner {
         return source.charAt(current + 1) == '€';
     }
 
-    private void scanToken() {
+    private void scanToken() throws IOException {
         char c = advance();
         switch (c) {
             case '(':
@@ -155,7 +156,7 @@ public class Escaner {
     }
 
     //Avanza al proximo caracter
-    private char advance(){
+    private char advance() throws IOException {
         if (isAtEnd()) return '€';
         if (column >= source.length()){
             source=lectorCF.rechargeBuffer();
@@ -215,7 +216,7 @@ public class Escaner {
      *   does not generate a token.
      */
     //
-    private void string() {
+    private void string() throws IOException {
         while (look() != '"' && !isAtEnd()) {
             if (look() == '\n') line++;
             advance();
@@ -235,7 +236,7 @@ public class Escaner {
         return c >= '0' && c <= '9';
     }
 
-    private void number() {
+    private void number() throws IOException {
         boolean isDouble = false;
         while (isDigit(look())) advance();
 
@@ -287,7 +288,7 @@ public class Escaner {
                 c == '_';
     }
 
-    private void identifier(char c) {
+    private void identifier(char c) throws IOException {
         boolean identificadorTipo = isAlphaCapital(c);
 
         while (isAlphaNumeric(look())){
