@@ -59,12 +59,12 @@ public class Escaner {
         this.source = source;
     }
 
-    List<Token> scanTokens(){
+    List<Token> scanTokens() throws IOException {
         while (!isAtEnd()){
 
             //Empezamos un nuevo lexema
             start = current;
-            scanTokens();
+            nextToken();
         }
 
         tokens.add(new Token(END, "", null, column, line));
@@ -77,7 +77,7 @@ public class Escaner {
         return source.charAt(current + 1) == '€';
     }
 
-    private void scanToken() throws IOException {
+    private void nextToken() throws IOException {
         char c = advance();
         switch (c) {
             case '(':
