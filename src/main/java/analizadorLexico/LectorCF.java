@@ -48,14 +48,5 @@ public class LectorCF {
         return source.toString();
     }
 
-    private static void setPath(String path){
-        LectorCF.path = path;
-    }
-    private static String getPath(){
-        return LectorCF.path;
-    }
 
-    public String rechargeBuffer(){
-        return "";
-    }
 }
