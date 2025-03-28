@@ -1,35 +1,51 @@
 package analizadorLexico;
 
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class LectorCF {
+    private RandomAccessFile raf;  // Atributo de la clase
 
-    private int current=0;
-
-    public static void main(String[] args) {
-        String rutaArchivo = "archivo.s"; // Ruta del archivo .s
-
-        try (FileReader fr = new FileReader(rutaArchivo)) {
-            int caracter;
-            while ((caracter = fr.read()) != -1) { // Lee un carácter a la vez
-                System.out.print((char) caracter); // Convierte el código ASCII a carácter
-            }
-        } catch (IOException e) {
-            System.err.println("Error al leer el archivo: " + e.getMessage());
+    public void lectorArchivo(String ruta) throws IOException {
+        try {
+            this.raf = new RandomAccessFile(ruta, "r"); // Abrimos el archivo una sola vez
+        }catch (IOException e){
+            throw new IOException(e.getMessage());
         }
     }
+    private static int current=0;
+    private static StringBuilder source= new StringBuilder();
 
-    private static void setPath(String path){
-        LectorCF.path = path;
-    }
-    private static String getPath(){
-        return LectorCF.path;
+    public void main(String[] args) throws IOException {
+        if (args.length < 1) {
+            System.out.println("Error: Se requiere el archivo fuente como parámetro.");
+            System.exit(1);  // Termina el programa con un código de error
+        }
+
+        // Obtener el archivo fuente desde los argumentos
+        String archivoFuente = args[0];
+        this.lectorArchivo(archivoFuente);
     }
 
-    public String rechargeBuffer(){
-        return "";
+    public String rechargeBuffer() throws IOException {
+        int caracter;
+        try {
+            this.raf.seek(current);
+        }catch (IOException e){
+            throw new IOException(e.getMessage());
+        }
+        int i;
+        for (i = current; i <= current + 2048; i++) {
+            if ((caracter = raf.read()) != -1) {
+                source.append((char) caracter);
+            } else {
+                source.append("€");
+                return source.toString();
+            }
+        }
+        current = i;
+        return source.toString();
     }
 
     private static void setPath(String path){
