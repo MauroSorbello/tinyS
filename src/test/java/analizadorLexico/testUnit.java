@@ -29,14 +29,14 @@ public class testUnit {
 
         @Test
         void testCasoExitoso() throws IOException {
-            String source = "dfa fdas";
+            String source = "if while en la proxima s /n ale hola hola€";
             escaner.setSource(source);
 
             List<Token> tokens = escaner.scanTokens();
 
             for (Token i : tokens)
             {
-                i.toString();
+                System.out.println(i.toString());
             }
 
 
