@@ -47,6 +47,4 @@ public class LectorCF {
         current = i;
         return source.toString();
     }
-
-
 }
