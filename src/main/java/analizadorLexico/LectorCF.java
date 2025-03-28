@@ -5,6 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class LectorCF {
+
+    private int current=0;
+
     public static void main(String[] args) {
         String rutaArchivo = "archivo.s"; // Ruta del archivo .s
 
@@ -16,5 +19,16 @@ public class LectorCF {
         } catch (IOException e) {
             System.err.println("Error al leer el archivo: " + e.getMessage());
         }
+    }
+
+    private static void setPath(String path){
+        LectorCF.path = path;
+    }
+    private static String getPath(){
+        return LectorCF.path;
+    }
+
+    public String rechargeBuffer(){
+        return "";
     }
 }
