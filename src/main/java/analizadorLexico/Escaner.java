@@ -39,40 +39,43 @@ public class Escaner {
         keywords.put("impl", IMPL);
         keywords.put("st", ST);
         keywords.put("div", DIV);
-        keywords.put("€",END);
+        keywords.put("€", END);
     }
 
     Escaner(String source) {
         this.source = source;
     }
+
     Escaner(LectorCF lectorCF) {
         this.lectorCF = lectorCF;
     }
+
     Escaner(String source, LectorCF lectorCF) {
         this.source = source;
         this.lectorCF = lectorCF;
     }
+
     Escaner() {
     }
 
-    public void setSource(String source){
+    public void setSource(String source) {
         this.source = source;
     }
 
     List<Token> scanTokens() throws IOException {
-        while (!isAtEnd()){
+        while (!isAtEnd()) {
 
             //Empezamos un nuevo lexema
             start = current;
             nextToken();
         }
 
-        tokens.add(new Token(END, "", null, column, line));
+        tokens.add(new Token(END, "", column, line));
         return tokens;
 
     }
 
-    private boolean isAtEnd(){
+    private boolean isAtEnd() {
         //return current >= source.length();
         return source.charAt(current + 1) == '€';
     }
@@ -155,14 +158,14 @@ public class Escaner {
             //case '\v': No lo toma
             //
         }
-        if (isDigit(c)){
+        if (isDigit(c)) {
             number();
-        } else{
-            if (isAlpha(c)){
+        } else {
+            if (isAlpha(c)) {
                 identifier(c);
-            } else{
+            } else {
                 ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-             }
+            }
 
         }
 
@@ -171,9 +174,9 @@ public class Escaner {
     //Avanza al proximo caracter
     private char advance() throws IOException {
         if (isAtEnd()) return '€';
-        if (column >= source.length()){
+        if (column >= source.length()) {
             //source=lectorCF.rechargeBuffer();
-            current=0;
+            current = 0;
         }
         column++;
         return source.charAt(current++);
@@ -187,13 +190,14 @@ public class Escaner {
     }
 
     //agrega un token sin literal
-    private void addToken(TokenType type){
-        addToken(type,null);
-    }
+    //private void addToken(TokenType type){
+    //addToken(type);
+    //}
+
     //agrega un token
-    private void addToken(TokenType type, Object literal){
+    private void addToken(TokenType type){
         String text = source.substring(start,current);
-        tokens.add(new Token(type,text,literal,line,column));
+        tokens.add(new Token(type,text,column,line));
     }
 
     private boolean nextMatch(char expected){
@@ -242,7 +246,7 @@ public class Escaner {
         advance();
 
         String value = source.substring(start + 1, current - 1);
-        addToken(STRING, value);
+        addToken(STRING);
     }
 
     private  boolean isDigit(char c){
@@ -269,10 +273,10 @@ public class Escaner {
 
         while (isDigit(look())) advance();
         if (isDouble){
-            addToken(DOUBLE, Double.parseDouble(source.substring(start,current)));
+            addToken(DOUBLE);
         }
         else{
-            addToken(INTEGER, Integer.parseInt(source.substring(start,current)));
+            addToken(INTEGER);
         }
 
     }
@@ -312,9 +316,9 @@ public class Escaner {
             addToken(keywords.get(text));
         }else{
             if (identificadorTipo){
-                addToken(CLASS,text);
+                addToken(CLASS);
             }else{
-                addToken(OBJETS,text);
+                addToken(OBJETS);
             }
         }
     }
