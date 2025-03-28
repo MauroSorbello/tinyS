@@ -46,7 +46,7 @@ public class Escaner {
         this.source = source;
     }
 
-    Escaner(LectorCF lectorCF) {
+    public void setEscaner(LectorCF lectorCF) {
         this.lectorCF = lectorCF;
     }
 
@@ -75,8 +75,11 @@ public class Escaner {
 
     }
 
-    private boolean isAtEnd() {
+    private boolean isAtEnd() throws IOException {
         //return current >= source.length();
+        if (current == 2048) {
+            source = lectorCF.rechargeBuffer();
+        }
         return source.charAt(current + 1) == '€';
     }
 
@@ -85,76 +88,78 @@ public class Escaner {
         switch (c) {
             case '(':
                 addToken(LEFT_PAREN);
-                break;
+                return;
             case ')':
                 addToken(RIGHT_PAREN);
-                break;
+                return;
             case ',':
                 addToken(COMMA);
-                break;
+                return;
             case '.':
                 addToken(DOT);
-                break;
+                return;
             case '*':
                 addToken(STAR);
-                break;
+                return;
             case ';':
                 addToken(SEMICOLON);
-                break;
+                return;
             case '{':
                 addToken(LEFT_BRACE);
-                break;
+                return;
             case '}':
                 addToken(RIGHT_BRACE);
-                break;
+                return;
             case '[':
                 addToken(LEFT_BRACKET);
-                break;
+                return;
             case ']':
                 addToken(RIGHT_BRACKET);
-                break;
+                return;
             case '+':
                 addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
-                break;
+                return;
             case '-':
                 addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
-                break;
+                return;
             case '!':
                 addToken(nextMatch('=') ? NOT_EQUAL : NOT);
-                break;
+                return;
             case '=':
                 addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
-                break;
+                return;
             case '>':
                 addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
-                break;
+                return;
             case '<':
                 addToken(nextMatch('=') ? LESS_EQUAL : LESS);
-                break;
+                return;
             case '/':
                 //Puede ser un comentario:
                 if (nextMatch('/')) {
                     //Pasamos de largo el comentario
                     while (look() != '\n' && !isAtEnd()) advance();
+                    column=0;
                     line = line + 1;
                 } else {
                     addToken(SLASH);
                 }
-                break;
+                return;
             //literales cadenas
             case '"':
                 string();
-                break;
+                return;
 
             case ' ':
-                break;
+                return;
             case '\t':
-                break;
+                return;
             case '\r':
-                break;
+                return;
             case '\n':
+                column=0;
                 line++;
-                break;
+                return;
             //case '\v': No lo toma
             //
         }
@@ -175,7 +180,7 @@ public class Escaner {
     private char advance() throws IOException {
         if (isAtEnd()) return '€';
         if (column >= source.length()) {
-            //source=lectorCF.rechargeBuffer();
+            source=lectorCF.rechargeBuffer();
             current = 0;
         }
         column++;
@@ -184,7 +189,7 @@ public class Escaner {
     }
 
     //miramos el siguiente sin consumirlo
-    private char look() {
+    private char look() throws IOException {
         if (isAtEnd()) return '€';
         return source.charAt(current);
     }
@@ -200,7 +205,7 @@ public class Escaner {
         tokens.add(new Token(type,text,column,line));
     }
 
-    private boolean nextMatch(char expected){
+    private boolean nextMatch(char expected) throws IOException {
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
         column++;
@@ -235,7 +240,10 @@ public class Escaner {
     //
     private void string() throws IOException {
         while (look() != '"' && !isAtEnd()) {
-            if (look() == '\n') line++;
+            if (look() == '\n') {
+                line++;
+                column = 0;
+            }
             advance();
         }
         if (isAtEnd()) {
@@ -281,7 +289,7 @@ public class Escaner {
 
     }
 
-    private char lookNext(){
+    private char lookNext() throws IOException {
         if(isAtEnd()) return '€';
         return source.charAt(current+1);
     }

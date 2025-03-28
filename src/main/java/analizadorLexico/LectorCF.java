@@ -40,7 +40,7 @@ public class LectorCF {
             if ((caracter = raf.read()) != -1) {
                 source.append((char) caracter);
             } else {
-                source.append("€");
+                source.append(" €");
                 return source.toString();
             }
         }

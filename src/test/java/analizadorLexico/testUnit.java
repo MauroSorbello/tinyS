@@ -12,7 +12,7 @@ public class testUnit {
     @Nested
     class TestUnit {
         Escaner escaner = new Escaner();
-
+        LectorCF lector = new LectorCF();
         /*
         @BeforeAll
         static void beforeAll() {
@@ -29,7 +29,10 @@ public class testUnit {
 
         @Test
         void testCasoExitoso() throws IOException {
-            String source = "if while en la proxima s /n ale hola hola€";
+            String source;
+            escaner.setEscaner(lector);
+            lector.lectorArchivo("C:/Users/Mauro Sorbello/Documents/FACULTAD/4 AÑO/Compiladores/tiny/tinyS/src/test/java/analizadorLexico/test.s");
+            source = lector.rechargeBuffer();
             escaner.setSource(source);
 
             List<Token> tokens = escaner.scanTokens();
