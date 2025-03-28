@@ -45,6 +45,19 @@ public class Escaner {
     Escaner(String source) {
         this.source = source;
     }
+    Escaner(LectorCF lectorCF) {
+        this.lectorCF = lectorCF;
+    }
+    Escaner(String source, LectorCF lectorCF) {
+        this.source = source;
+        this.lectorCF = lectorCF;
+    }
+    Escaner() {
+    }
+
+    public void setSource(String source){
+        this.source = source;
+    }
 
     List<Token> scanTokens(){
         while (!isAtEnd()){
@@ -159,7 +172,7 @@ public class Escaner {
     private char advance() throws IOException {
         if (isAtEnd()) return '€';
         if (column >= source.length()){
-            source=lectorCF.rechargeBuffer();
+            //source=lectorCF.rechargeBuffer();
             current=0;
         }
         column++;
