@@ -17,17 +17,6 @@ public class LectorCF {
     private static int current=0;
     private static StringBuilder source= new StringBuilder();
 
-    public void main(String[] args) throws IOException {
-        if (args.length < 1) {
-            System.out.println("Error: Se requiere el archivo fuente como parámetro.");
-            System.exit(1);  // Termina el programa con un código de error
-        }
-
-        // Obtener el archivo fuente desde los argumentos
-        String archivoFuente = args[0];
-        this.lectorArchivo(archivoFuente);
-    }
-
     public String rechargeBuffer() throws IOException {
         int caracter;
         try {
