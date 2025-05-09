@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.util.List;
 
 
-public class testUnit {
+public class TestUnit {
 
     @Nested
-    class TestUnit {
+    class testUnit {
         Escaner escaner = new Escaner();
         LectorCF lector = new LectorCF();
         /*
