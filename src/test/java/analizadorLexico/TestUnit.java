@@ -31,7 +31,7 @@ public class testUnit {
         void testCasoExitoso() throws IOException {
             String source;
             escaner.setEscaner(lector);
-            lector.lectorArchivo("C:/Users/Mauro Sorbello/Documents/FACULTAD/4 AÑO/Compiladores/tiny/tinyS/src/test/java/analizadorLexico/test.s");
+            lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/java/analizadorLexico/testc.s");
             source = lector.rechargeBuffer();
             escaner.setSource(source);
 
