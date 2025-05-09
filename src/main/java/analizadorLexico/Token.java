@@ -14,6 +14,10 @@ public class Token {
         this.line = (int) line;
     }
 
+    public TokenType getType() {
+        return type;
+    }
+
     public String toString() {
         return "" +type + " " + lexema  + " " + line + " " + column;
     }
