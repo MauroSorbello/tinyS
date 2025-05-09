@@ -3,6 +3,8 @@ package analizadorLexico;
 
 import org.junit.jupiter.api.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -31,15 +33,26 @@ public class testUnit {
         void testCasoExitoso() throws IOException {
             String source;
             escaner.setEscaner(lector);
-            lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/java/analizadorLexico/testc.s");
+            lector.lectorArchivo("C:/Users/Mauro Sorbello/Documents/FACULTAD/4 AÑO/Compiladores/tiny/tinyS/src/test/java/analizadorLexico/testc.s");
             source = lector.rechargeBuffer();
             escaner.setSource(source);
 
             List<Token> tokens = escaner.scanTokens();
 
-            for (Token i : tokens)
-            {
-                System.out.println(i.toString());
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("tokens_output.txt"))) {
+
+                for (Token i : tokens) {
+                    String tokenString = i.toString();
+
+
+                    System.out.println(tokenString);
+
+
+                    writer.write(tokenString);
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
 
