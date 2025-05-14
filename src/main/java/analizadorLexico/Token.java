@@ -17,6 +17,15 @@ public class Token {
     public TokenType getType() {
         return type;
     }
+    public String getLexema() {
+        return lexema;
+    }
+    public int getLine() {
+        return line;
+    }
+    public int getColumn() {
+        return column;
+    }
 
     public String toString() {
         return "" +type + " " + lexema  + " " + line + " " + column;

@@ -25,7 +25,6 @@ public class Escaner {
         keywords = new HashMap<>();
         keywords.put("fn", FN);
         keywords.put("class", CLASS);
-        keywords.put("objets", OBJETS);
         keywords.put("if", IF);
         keywords.put("else", ELSE);
         keywords.put("while", WHILE);
@@ -39,6 +38,14 @@ public class Escaner {
         keywords.put("impl", IMPL);
         keywords.put("st", ST);
         keywords.put("div", DIV);
+        keywords.put("Array", ARRAY);
+        keywords.put("Int", INT);
+        keywords.put("Double", DOUBLE);
+        keywords.put("Str", STR);
+        keywords.put("Object",OBJECT);
+        keywords.put("IO", IO);
+        keywords.put("start", START);
+        keywords.put("void", VOID);
         keywords.put("€", END);
     }
 
@@ -83,57 +90,60 @@ public class Escaner {
         return source.charAt(current + 1) == '€';
     }
 
-    public void nextToken() throws IOException {
+    public Token nextToken() throws IOException {
         char c = advance();
         switch (c) {
             case '(':
-                addToken(LEFT_PAREN);
-                return;
+                return addToken(LEFT_PAREN);
+
             case ')':
-                addToken(RIGHT_PAREN);
-                return;
+                return addToken(RIGHT_PAREN);
+
             case ',':
-                addToken(COMMA);
-                return;
+                return addToken(COMMA);
+
             case '.':
-                addToken(DOT);
-                return;
+                return addToken(DOT);
+
+            case ':':
+                return addToken(DOBLE_DOT);
+
             case '*':
-                addToken(STAR);
-                return;
+                return addToken(MULT);
+
             case ';':
-                addToken(SEMICOLON);
-                return;
+                return addToken(SEMICOLON);
+
             case '{':
-                addToken(LEFT_BRACE);
-                return;
+                return addToken(LEFT_BRACE);
+
             case '}':
-                addToken(RIGHT_BRACE);
-                return;
+                return addToken(RIGHT_BRACE);
+
             case '[':
-                addToken(LEFT_BRACKET);
-                return;
+                return addToken(LEFT_BRACKET);
+
             case ']':
-                addToken(RIGHT_BRACKET);
-                return;
+                return addToken(RIGHT_BRACKET);
+
             case '+':
-                addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
-                return;
+                return addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
+
             case '-':
-                addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
-                return;
+                return addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
+
             case '!':
-                addToken(nextMatch('=') ? NOT_EQUAL : NOT);
-                return;
+                return addToken(nextMatch('=') ? NOT_EQUAL : NOT);
+
             case '=':
-                addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
-                return;
+                return addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
+
             case '>':
-                addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
-                return;
+                return addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
+
             case '<':
-                addToken(nextMatch('=') ? LESS_EQUAL : LESS);
-                return;
+                return addToken(nextMatch('=') ? LESS_EQUAL : LESS);
+
             case '/':
                 //Puede ser un comentario:
                 if (nextMatch('/')) {
@@ -141,35 +151,37 @@ public class Escaner {
                     while (look() != '\n' && !isAtEnd()) advance();
                     column=0;
                     line = line + 1;
+                    return nextToken();
                 } else {
-                    addToken(SLASH);
+                    return addToken(SLASH);
                 }
-                return;
+
             //literales cadenas
             case '"':
-                string();
-                return;
+                return string();
+
 
             case ' ':
-                return;
+                return nextToken();
             case '\t':
-                return;
+                return nextToken();
             case '\r':
-                return;
+                return nextToken();
             case '\n':
                 column=0;
                 line++;
-                return;
+                return nextToken();
             //case '\v': No lo toma
             //
         }
         if (isDigit(c)) {
-            number();
+            return number();
         } else {
             if (isAlpha(c)) {
-                identifier(c);
+                return identifier(c);
             } else {
                 ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
 
         }
@@ -200,9 +212,11 @@ public class Escaner {
     //}
 
     //agrega un token
-    private void addToken(TokenType type){
+    private Token addToken(TokenType type){
         String text = source.substring(start,current);
-        tokens.add(new Token(type,text,column,line));
+        Token token = new Token(type,text,column,line);
+        tokens.add(token);
+        return token;
     }
 
     private boolean nextMatch(char expected) throws IOException {
@@ -238,7 +252,7 @@ public class Escaner {
      *   does not generate a token.
      */
     //
-    private void string() throws IOException {
+    private Token string() throws IOException {
         while (look() != '"' && !isAtEnd()) {
             if (look() == '\n') {
                 line++;
@@ -248,20 +262,20 @@ public class Escaner {
         }
         if (isAtEnd()) {
             ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", source.substring(start + 1, current - 1));
-            return;
+            throw new IOException("Cadena sin terminar en línea " + line + ", columna " + column);
         }
 
         advance();
 
         String value = source.substring(start + 1, current - 1);
-        addToken(STRING);
+        return addToken(STRING_LITERAL);
     }
 
     private  boolean isDigit(char c){
         return c >= '0' && c <= '9';
     }
 
-    private void number() throws IOException {
+    private Token number() throws IOException {
         boolean isDouble = false;
         while (isDigit(look())) advance();
 
@@ -272,19 +286,24 @@ public class Escaner {
                 advance();
                 isDouble = true;
             }else {
+
                 ErrorLex.errorDec(line, column, "DOUBLE INVALID", source.substring(start + 1, current - 1));
+                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
         }
         if(isAlpha(look())) {
+
             ErrorLex.errorDec(line, column, "CARACTER INVALIDO", source.substring(start + 1, current - 1));
+            throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+
         }
 
         while (isDigit(look())) advance();
         if (isDouble){
-            addToken(DOUBLE);
+            return addToken(DOUBLE_LITERAL);
         }
         else{
-            addToken(INTEGER);
+            return addToken(INTEGER_LITERAL);
         }
 
     }
@@ -313,7 +332,7 @@ public class Escaner {
                 c == '_';
     }
 
-    private void identifier(char c) throws IOException {
+    private Token identifier(char c) throws IOException {
         boolean identificadorTipo = isAlphaCapital(c);
 
         while (isAlphaNumeric(look())){
@@ -321,12 +340,12 @@ public class Escaner {
         }
         String text = source.substring(start,current);
         if (keywords.containsKey(text)){
-            addToken(keywords.get(text));
+            return addToken(keywords.get(text));
         }else{
             if (identificadorTipo){
-                addToken(CLASS);
+                return addToken(IDCLASS);
             }else{
-                addToken(OBJETS);
+                return addToken(IDOBJETS);
             }
         }
     }
