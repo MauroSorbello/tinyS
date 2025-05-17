@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static analizadorLexico.TokenType.*;
 
+
 public class Escaner {
     private String source;
     private final List<Token> tokens = new ArrayList<>();
@@ -42,27 +43,28 @@ public class Escaner {
         keywords.put("Int", INT);
         keywords.put("Double", DOUBLE);
         keywords.put("Str", STR);
-        keywords.put("Object",OBJECT);
-        keywords.put("IO", IO);
         keywords.put("start", START);
         keywords.put("void", VOID);
-        keywords.put("€", END);
     }
 
     Escaner(String source) {
         this.source = source;
     }
 
-    public void setEscaner(LectorCF lectorCF) {
-        this.lectorCF = lectorCF;
-    }
 
     Escaner(String source, LectorCF lectorCF) {
         this.source = source;
         this.lectorCF = lectorCF;
     }
 
-    Escaner() {
+    Escaner(LectorCF lectorCF) {
+        this.lectorCF = lectorCF;
+    }
+
+    Escaner() {}
+
+    public void setEscaner(LectorCF lectorCF) {
+        this.lectorCF = lectorCF;
     }
 
     public void setSource(String source) {
@@ -77,7 +79,7 @@ public class Escaner {
             nextToken();
         }
 
-        tokens.add(new Token(END, "", column, line));
+        tokens.add(new Token(EOF, "", column, line));
         return tokens;
 
     }
@@ -94,54 +96,73 @@ public class Escaner {
         char c = advance();
         switch (c) {
             case '(':
+                start=current-1;
                 return addToken(LEFT_PAREN);
 
             case ')':
+                start=current-1;
                 return addToken(RIGHT_PAREN);
 
             case ',':
+                start=current-1;
                 return addToken(COMMA);
 
             case '.':
+                start=current-1;
                 return addToken(DOT);
 
             case ':':
+                start=current-1;
                 return addToken(DOBLE_DOT);
 
             case '*':
+                start=current-1;
                 return addToken(MULT);
 
             case ';':
+                start=current-1;
                 return addToken(SEMICOLON);
 
             case '{':
+                start=current-1;
                 return addToken(LEFT_BRACE);
 
             case '}':
+                start=current-1;
                 return addToken(RIGHT_BRACE);
 
             case '[':
+                start=current-1;
                 return addToken(LEFT_BRACKET);
 
             case ']':
+                start=current-1;
                 return addToken(RIGHT_BRACKET);
+            case '€':
+                return addToken(END);
 
             case '+':
+                start=current-1;
                 return addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
 
             case '-':
+                start=current-1;
                 return addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
 
             case '!':
+                start=current-1;
                 return addToken(nextMatch('=') ? NOT_EQUAL : NOT);
 
             case '=':
+                start=current-1;
                 return addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
 
             case '>':
+                start=current-1;
                 return addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
 
             case '<':
+                start=current-1;
                 return addToken(nextMatch('=') ? LESS_EQUAL : LESS);
 
             case '/':
@@ -153,6 +174,7 @@ public class Escaner {
                     line = line + 1;
                     return nextToken();
                 } else {
+                    start=current-1;
                     return addToken(SLASH);
                 }
 
@@ -164,8 +186,10 @@ public class Escaner {
             case ' ':
                 return nextToken();
             case '\t':
+
                 return nextToken();
             case '\r':
+
                 return nextToken();
             case '\n':
                 column=0;
@@ -333,6 +357,7 @@ public class Escaner {
     }
 
     private Token identifier(char c) throws IOException {
+        start=current-1;
         boolean identificadorTipo = isAlphaCapital(c);
 
         while (isAlphaNumeric(look())){

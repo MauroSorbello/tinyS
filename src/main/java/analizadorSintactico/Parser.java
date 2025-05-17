@@ -1,4 +1,4 @@
-package analizadorSintactico;
+/**package analizadorSintactico;
 
 import analizadorLexico.ErrorLex;
 import analizadorLexico.Escaner;
@@ -640,7 +640,7 @@ public class Parser {
 
 }
 
-
+*/
 
 
 
