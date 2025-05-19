@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Nested
@@ -32,19 +33,26 @@ public class TestUnit {
     void testCasoExitoso() throws IOException {
         String source;
         escaner.setEscaner(lector);
-        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/testc.s");
+        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/testb.s");
         source = lector.rechargeBuffer();
-        escaner.setSource(source);
+        escaner.setBuffer(source);
 
-        List<Token> tokens = escaner.scanTokens();
+        List<Token> tokens = new ArrayList<>();
+        Token tokenActual;
+
+        do {
+            tokenActual = escaner.nextToken();
+            tokens.add(tokenActual);
+
+        } while (tokenActual.getType() != TokenType.EOF);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("tokens_output.txt"))) {
 
             for (Token i : tokens) {
                 String tokenString = i.toString();
 
-
-                System.out.println(tokenString);
+                System.out.println("TokenType."+ i.getType() +",");
+                //System.out.println(tokenString);
 
 
                 writer.write(tokenString);

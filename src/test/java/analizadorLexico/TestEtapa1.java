@@ -1,23 +1,82 @@
 package analizadorLexico;
 
-import analizadorLexico.Escaner;
-import analizadorLexico.LectorCF;
-import analizadorLexico.Token;
-import analizadorLexico.TokenType;
-
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestEtapa1 {
-    Escaner escaner = new Escaner();
-    LectorCF lector = new LectorCF();
+    static Escaner escaner = new Escaner();
+    static LectorCF lector = new LectorCF();
+
+    @BeforeAll
+    static void setup() throws IOException {
+        // Código que se ejecuta una sola vez antes de todos los tests
+        System.out.println("Configuración inicial para todos los tests");
+
+        // Aquí puedes inicializar recursos compartidos, como el escaner y el lector
+        escaner.setEscaner(lector);
+        // Inicializar el lector con el archivo
+    }
+
+
+    private List<Token> scan(String source) throws IOException {
+        lector.lectorArchivo(source); /// Usar un mtodo para establecer la fuente directamente
+        String buffer = lector.rechargeBuffer();
+        escaner.setBuffer(buffer);
+
+
+        List<Token> tokens = new ArrayList<>();
+        Token tokenActual;
+        do {
+            tokenActual = escaner.nextToken();
+            tokens.add(tokenActual);
+        } while (tokenActual.getType() != TokenType.EOF);
+        return tokens;
+    }
+
+
+    @Test
+    public void testIdentificadores() throws IOException {
+        String source = "class MiClase objeto1 objeto2";
+        List<Token> tokens = scan(source);
+
+        List<TokenType> tiposEsperados = Arrays.asList(
+                TokenType.CLASS,
+                TokenType.IDCLASS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.EOF
+        );
+
+        for (int i = 0; i < tiposEsperados.size(); i++) {
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
+        }
+    }
+
+    @Test
+    public void testPalabrasClave() throws IOException {
+        String source = "if else while true false";
+        List<Token> tokens = scan(source);
+
+        List<TokenType> tiposEsperados = Arrays.asList(
+                TokenType.IF,
+                TokenType.ELSE,
+                TokenType.WHILE,
+                TokenType.TRUE,
+                TokenType.FALSE,
+                TokenType.EOF
+        );
+
+        for (int i = 0; i < tiposEsperados.size(); i++) {
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
+        }
+    }
 
 
 
@@ -69,8 +128,13 @@ public class TestEtapa1 {
                 TokenType.IDOBJETS,
                 TokenType.RIGHT_PAREN,
                 TokenType.LEFT_BRACE,
-
+                TokenType.IF,
+                TokenType.LEFT_PAREN,
                 TokenType.IDOBJETS,
+                TokenType.EQUAL_EQUAL,
+                TokenType.INTEGER_LITERAL,
+                TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE,
                 TokenType.LEFT_PAREN,
                 TokenType.IDOBJETS,
                 TokenType.LEFT_PAREN,
@@ -86,9 +150,8 @@ public class TestEtapa1 {
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
-                TokenType.IDOBJETS,
-                TokenType.IDOBJETS,
-                TokenType.IDOBJETS,
+                TokenType.ELSE,
+                TokenType.IF,
                 TokenType.LEFT_PAREN,
                 TokenType.IDOBJETS,
                 TokenType.EQUAL_EQUAL,
@@ -116,8 +179,7 @@ public class TestEtapa1 {
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
-                TokenType.IDOBJETS,
-                TokenType.IDOBJETS,
+                TokenType.ELSE,
                 TokenType.LEFT_BRACE,
                 TokenType.LEFT_PAREN,
                 TokenType.IDOBJETS,
@@ -150,6 +212,7 @@ public class TestEtapa1 {
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
+                TokenType.RET,
                 TokenType.IDOBJETS,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
@@ -170,10 +233,11 @@ public class TestEtapa1 {
                 TokenType.INTEGER_LITERAL,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
+                TokenType.FN,
                 TokenType.IDOBJETS,
-                TokenType.INTEGER_LITERAL,
                 TokenType.LEFT_PAREN,
-                TokenType.IDCLASS,
+                TokenType.INT,
+                TokenType.IDOBJETS,
                 TokenType.RIGHT_PAREN,
                 TokenType.LEFT_BRACE,
                 TokenType.LEFT_PAREN,
@@ -204,10 +268,11 @@ public class TestEtapa1 {
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
+                TokenType.FN,
                 TokenType.IDOBJETS,
-                TokenType.INTEGER_LITERAL,
                 TokenType.LEFT_PAREN,
-                TokenType.IDCLASS,
+                TokenType.INT,
+                TokenType.IDOBJETS,
                 TokenType.RIGHT_PAREN,
                 TokenType.LEFT_BRACE,
                 TokenType.LEFT_PAREN,
@@ -230,16 +295,18 @@ public class TestEtapa1 {
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
                 TokenType.RIGHT_BRACE,
-                TokenType.IDOBJETS,
                 TokenType.START,
                 TokenType.LEFT_BRACE,
                 TokenType.IDCLASS,
+                TokenType.IDOBJETS,
                 TokenType.SEMICOLON,
-                TokenType.IDCLASS,
+                TokenType.INT,
+                TokenType.IDOBJETS,
                 TokenType.SEMICOLON,
                 TokenType.IDOBJETS,
                 TokenType.EQUAL,
-                TokenType.IDOBJETS,
+                TokenType.NEW,
+                TokenType.IDCLASS,
                 TokenType.LEFT_PAREN,
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
@@ -266,17 +333,11 @@ public class TestEtapa1 {
                 TokenType.RIGHT_PAREN,
                 TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE,
-                TokenType.END
+                TokenType.EOF
         );
 
 
-        escaner.setEscaner(lector);
-        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/testc.s");
-        String source = lector.rechargeBuffer();
-        escaner.setSource(source);
-
-        List<Token> tokens = escaner.scanTokens();
-        Escaner escaner = new Escaner(lector);
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/testc.s");
 
         for (int i = 0; i < tokens.size(); i++) {
             assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
