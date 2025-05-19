@@ -11,8 +11,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestEtapa1 {
-    static Escaner escaner = new Escaner();
-    static LectorCF lector = new LectorCF();
 
     @BeforeAll
     static void setup() throws IOException {
@@ -20,13 +18,16 @@ public class TestEtapa1 {
         System.out.println("Configuración inicial para todos los tests");
 
         // Aquí puedes inicializar recursos compartidos, como el escaner y el lector
-        escaner.setEscaner(lector);
+
         // Inicializar el lector con el archivo
     }
 
 
     private List<Token> scan(String source) throws IOException {
-        lector.lectorArchivo(source); /// Usar un mtodo para establecer la fuente directamente
+        LectorCF lector = new LectorCF();
+        Escaner escaner = new Escaner();
+        escaner.setEscaner(lector);
+        lector.lectorArchivo(source); /// Usar un metodo para establecer la fuente directamente
         String buffer = lector.rechargeBuffer();
         escaner.setBuffer(buffer);
 
