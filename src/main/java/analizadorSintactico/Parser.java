@@ -1,4 +1,4 @@
-/**package analizadorSintactico;
+package analizadorSintactico;
 
 import analizadorLexico.ErrorLex;
 import analizadorLexico.Escaner;
@@ -206,12 +206,12 @@ public class Parser {
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo();
-            lista_declaracion_variables();
+            lista_declaraciones_variables();
         }else{
             if(type == PUB){
                 visibilidad();
                 tipo();
-                lista_declaracion_variables();
+                lista_declaraciones_variables();
             }else{
                 throw new IOException("Se espera un atributo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
             }
@@ -471,7 +471,7 @@ public class Parser {
         if(type == IF){
             macheo(IF);
             macheo(LEFT_PAREN);
-            ExpOr();
+            expOr();
             macheo(RIGHT_PAREN);
             sentencia();
             sentencia_else();
@@ -517,7 +517,7 @@ public class Parser {
         if (type==IDCLASS || type==IDOBJETS || type==PLUS || type==MINUS || type==NOT || type==PLUS_PLUS || type==MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == DOUBLE_LITERAL || type == STRING_LITERAL || type==SELF || type == NEW || type == LEFT_PAREN){
             expOr();
         }else{
-            if(SEMICOLON){
+            if(type == SEMICOLON){
                 return;
             }else{
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -540,6 +540,7 @@ public class Parser {
     }
 
     private void bloque() throws IOException{
+        TokenType type = currentToken.getType();
         if (type == LEFT_BRACE){
             macheo(LEFT_BRACE);
             sentencia_bloque_recursivo();
@@ -634,13 +635,505 @@ public class Parser {
         }
     }
 
+    private void expOr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expAnd();
+            expOrPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expOrPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == OR) {
+            expAnd();
+            expOrPr();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void expAnd() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expIgual();
+            expAndPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expAndPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == AND) {
+            expIgual();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void expIgual() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expCompuesta();
+            expIgualPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expIgualPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == EQUAL_EQUAL || type == NOT_EQUAL) {
+            opIgual();
+            expCompuesta();
+            expIgualPr();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void expCompuesta() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expAd();
+            expCompuestaPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expCompuestaPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
+            opCompuesta();
+            expAd();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void expAd() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expMul();
+            expAdPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expAdPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == PLUS || type == MINUS) {
+            opAd();
+            expMul();
+            expAdPr();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void expMul() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
+            expUn();
+            expMulPr();
+        }else{
+            throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void expMulPr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == MULT || type == SLASH || type == DIV || type == PERCENTAGE) {
+            opMul();
+            expUn();
+            expMulPr();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void opIgual() throws IOException{
+        if (currentToken.getType() == EQUAL_EQUAL){
+            macheo(EQUAL_EQUAL);
+        }else {
+            if (currentToken.getType() == NOT_EQUAL) {
+                macheo(NOT_EQUAL);
+            }else{
+                throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void opAd() throws IOException{
+        if (currentToken.getType() == PLUS){
+            macheo(PLUS);
+        }else {
+            if (currentToken.getType() == MINUS) {
+                macheo(MINUS);
+            } else {
+                throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void opCompuesta() throws IOException{
+        if (currentToken.getType() == GREATER){
+            macheo(GREATER);
+        }else {
+            if (currentToken.getType() == GREATER_EQUAL) {
+                macheo(GREATER_EQUAL);
+            }else{
+                if (currentToken.getType() == LESS) {
+                    macheo(LESS);
+                }else {
+                    if (currentToken.getType() == LESS_EQUAL) {
+                        macheo(LESS_EQUAL);
+                    } else {
+                        throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                    }
+                }
+            }
+        }
+    }
+
+    private void opUnario() throws IOException{
+        if (currentToken.getType() == PLUS){
+            macheo(PLUS);
+        }else {
+            if (currentToken.getType() == MINUS) {
+                macheo(MINUS);
+            }else{
+                if (currentToken.getType() == NOT) {
+                    macheo(NOT);
+                }else {
+                    if (currentToken.getType() == PLUS_PLUS) {
+                        macheo(PLUS_PLUS);
+                    } else {
+                        if (currentToken.getType() == MINUS_MINUS) {
+                            macheo(MINUS_MINUS);
+                        } else {
+                            if (currentToken.getType() == LEFT_BRACE) {
+                                macheo(LEFT_BRACE);
+                                macheo(INT);
+                                macheo(RIGHT_PAREN);
+                            } else {
+                                throw new IOException("Se espera la una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void opMul() throws IOException{
+        if (currentToken.getType() == MULT){
+            macheo(MULT);
+        }else {
+            if (currentToken.getType() == SLASH) {
+                macheo(SLASH);
+            }else{
+                if (currentToken.getType() == PERCENTAGE) {
+                    macheo(PERCENTAGE);
+                }else {
+                    if (currentToken.getType() == DIV) {
+                        macheo(DIV);
+                    } else {
+                        throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                    }
+                }
+            }
+        }
+    }
+
+    private void operando() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == LEFT_PAREN  || type == SELF || type == NEW){
+            primario();
+            encadenado_factorizado();
+        }else{
+            if (type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL){
+                literal();
+            }else {
+                throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void encadenado_factorizado() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == DOT) {
+            encadenado();
+        }else {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == LEFT_BRACKET || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void literal() throws IOException{
+        if (currentToken.getType() == NIL){
+            macheo(NIL);
+        }else {
+            if (currentToken.getType() == TRUE) {
+                macheo(TRUE);
+            }else{
+                if (currentToken.getType() == FALSE) {
+                    macheo(FALSE);
+                }else {
+                    if (currentToken.getType() == INTEGER_LITERAL) {
+                        macheo(INTEGER_LITERAL);
+                    } else {
+                        if (currentToken.getType() == STRING_LITERAL) {
+                            macheo(STRING_LITERAL);
+                        } else {
+                            if (currentToken.getType() == DOUBLE_LITERAL) {
+                                macheo(DOUBLE_LITERAL);
+                            } else {
+                                throw new IOException("Se espera la una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void primario() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == LEFT_PAREN){
+            expresionParentizada();
+        }else{
+            if(type==SELF){
+                accesoSelf();
+            }else{
+                if(type==IDOBJETS){
+                    macheo(IDOBJETS);
+                    id_factor();
+                }else{
+                    if(type==IDCLASS){
+                        llamada_metodo_estatico();
+                    }else{
+                        if(type==NEW){
+                            llamada_conclasor();
+                        }else{
+                            throw new IOException("Se espera una sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void expresionParentizada() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == LEFT_PAREN ) {
+            macheo(LEFT_PAREN);
+            expOr();
+            macheo(RIGHT_PAREN);
+            encadenado_factorizado();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void accesoSelf() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == SELF ) {
+            macheo(SELF);
+            encadenado_factorizado();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void accesoVar_pr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == DOT || type == SEMICOLON || type == COMMA  || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == DIV || type == PERCENTAGE){
+            encadenado_factorizado();
+        }else{
+            if (type == LEFT_BRACKET){
+                macheo(LEFT_BRACKET);
+                expOr();
+                macheo(RIGHT_BRACKET);
+                encadenado_factorizado();
+            }else {
+                throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void llamada_metodo() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == LEFT_PAREN ) {
+            argumentos_actuales();
+            encadenado_factorizado();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void llamada_metodo_estatico() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS ) {
+            macheo(IDCLASS);
+            macheo(DOT);
+            macheo(IDOBJETS);
+            llamada_metodo();
+            encadenado_factorizado();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void llamada_conclasor() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == NEW ) {
+            macheo(NEW);
+            llamada_conclasor_pr();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void llamada_conclasor_pr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS){
+            macheo(IDCLASS);
+            argumentos_actuales();
+            encadenado_factorizado();
+        }else{
+            if (type == STR || type == DOUBLE || type == INT || type == BOOL){
+                tipo_primitivo();
+                macheo(LEFT_BRACKET);
+                expOr();
+                macheo(RIGHT_BRACKET);
+            }else {
+                throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void argumentos_actuales() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == LEFT_PAREN) {
+            macheo(LEFT_PAREN);
+            lista_expresiones_factorizado();
+            macheo(RIGHT_PAREN);
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void lista_expresiones_factorizado() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
+            lista_expresiones();
+        }else {
+            if (type == RIGHT_PAREN) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void lista_expresiones() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
+            expOr();
+            lista_expresiones_pr();
+        }else {
+            throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void lista_expresiones_pr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == COMMA) {
+            macheo(COMMA);
+            lista_expresiones();
+        }else {
+            if (type == RIGHT_PAREN) {
+                return;
+            } else {
+                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+    private void encadenado() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == DOT) {
+            macheo(DOT);
+            encadenado_pr();
+        }else {
+            throw new IOException("Se espera una experesion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void encadenado_pr() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == IDOBJETS) {
+            macheo(IDOBJETS);
+            id_factor();
+        }else {
+            throw new IOException("Se espera una experesion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        }
+    }
+
+    private void id_factor() throws IOException{
+        TokenType type = currentToken.getType();
+        if(type == DOT || type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == LEFT_BRACKET || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == LESS || type == GREATER || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV ) {
+            accesoVar_pr();
+        }else {
+            if (type == LEFT_PAREN) {
+                llamada_metodo();
+            } else {
+                throw new IOException("Se espera una experesion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            }
+        }
+    }
+
+ 
 
 
 
 
 }
 
-*/
+
 
 
 
