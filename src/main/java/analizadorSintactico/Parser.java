@@ -24,7 +24,7 @@ public class Parser {
         TokenType type = currentToken.getType();
         if (type == CLASS || type == IMPL){
             program();
-            macheo(END);
+            macheo(EOF);
         }
         throw new IOException("TOKEN INVALIDO en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
     }
