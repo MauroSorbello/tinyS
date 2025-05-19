@@ -118,6 +118,10 @@ public class Escaner {
                 start=current-1;
                 return addToken(MULT);
 
+            case '%':
+                start=current-1;
+                return addToken(PERCENTAGE);
+
             case ';':
                 start=current-1;
                 return addToken(SEMICOLON);
@@ -178,6 +182,25 @@ public class Escaner {
                     return addToken(SLASH);
                 }
 
+            case '|':
+                //Puede ser un comentario:
+                if (nextMatch('|')) {
+                    //Pasamos de largo el comentario
+                    return addToken(OR);
+                } else {
+                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                }
+
+            case '&':
+                //Puede ser un comentario:
+                if (nextMatch('&')) {
+                    //Pasamos de largo el comentario
+                    return addToken(AND);
+                } else {
+                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                }
             //literales cadenas
             case '"':
                 return string();
