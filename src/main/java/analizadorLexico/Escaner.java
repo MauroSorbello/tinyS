@@ -42,8 +42,6 @@ public class Escaner {
         keywords.put("Int", INT);
         keywords.put("Double", DOUBLE);
         keywords.put("Str", STR);
-        keywords.put("Object",OBJECT);
-        keywords.put("IO", IO);
         keywords.put("start", START);
         keywords.put("void", VOID);
         keywords.put("€", END);
@@ -99,6 +97,9 @@ public class Escaner {
             case ')':
                 return addToken(RIGHT_PAREN);
 
+            case '%':
+                return addToken(PERCENTAGE);
+
             case ',':
                 return addToken(COMMA);
 
@@ -128,6 +129,20 @@ public class Escaner {
 
             case '+':
                 return addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
+            case '&':
+                if(nextMatch('&')){
+                    return addToken(AND);
+                } else {
+                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                }
+            case '|':
+                if(nextMatch('|')){
+                    return addToken(OR);
+                } else {
+                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                }
 
             case '-':
                 return addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
@@ -155,6 +170,7 @@ public class Escaner {
                 } else {
                     return addToken(SLASH);
                 }
+
 
             //literales cadenas
             case '"':
