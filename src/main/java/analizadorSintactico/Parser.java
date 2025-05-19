@@ -781,6 +781,24 @@ public class Parser {
         }
     }
 
+    private void expUn() throws IOException{
+        TokenType type = currentToken.getType();
+        if (type == LEFT_PAREN) {
+
+        } else {
+            if (type == IDCLASS || type == IDOBJETS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW) {
+                operando();
+            } else {
+                if (type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS) {
+                    opUnario();
+                    expUn();
+                } else {
+                    throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                }
+            }
+        }
+    }
+
     private void opIgual() throws IOException{
         if (currentToken.getType() == EQUAL_EQUAL){
             macheo(EQUAL_EQUAL);
