@@ -59,7 +59,7 @@ public class Escaner {
         this.lectorCF = lectorCF;
     }
 
-    Escaner() {}
+    public Escaner() {}
 
     public void setEscaner(LectorCF lectorCF) {
         this.lectorCF = lectorCF;
