@@ -13,11 +13,27 @@ public class Parser {
 
     private Token currentToken;
     private Escaner escaner;
+    private Token lookaheadToken;
+    private boolean hasLookahead = false;
 
     public void macheo(TokenType tokenType) throws IOException {
         if (currentToken.getType() == tokenType){
-            currentToken = escaner.nextToken();
+            if (hasLookahead) {
+                currentToken = lookaheadToken;
+                hasLookahead = false;
+            } else {
+                currentToken = escaner.nextToken();
+            }
         }
+    }
+
+    //Leer token sin consumirlo
+    private Token peekToken() throws IOException {
+        if (!hasLookahead) {
+            lookaheadToken = escaner.nextToken();
+            hasLookahead = true;
+        }
+        return lookaheadToken;
     }
 
     private void s() throws ErrorLex, IOException {
@@ -784,7 +800,13 @@ public class Parser {
     private void expUn() throws IOException{
         TokenType type = currentToken.getType();
         if (type == LEFT_PAREN) {
-
+            peekToken();
+            if (lookaheadToken.getType() == INT){
+                opUnario();
+                expUn();
+            }else {
+                operando();
+            }
         } else {
             if (type == IDCLASS || type == IDOBJETS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW) {
                 operando();
@@ -793,7 +815,7 @@ public class Parser {
                     opUnario();
                     expUn();
                 } else {
-                    throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+                    throw new IOException("Se espera una expresion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
                 }
             }
         }
