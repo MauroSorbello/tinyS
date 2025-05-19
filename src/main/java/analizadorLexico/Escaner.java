@@ -178,8 +178,37 @@ public class Escaner {
                     line = line + 1;
                     return nextToken();
                 } else {
-                    start=current-1;
-                    return addToken(SLASH);
+                    if (nextMatch('*')) {
+                        //Pasamos de largo el comentario
+                        char caracter;
+                        System.out.println("ENTRE EN EL BLOQUE DE COMENTARIO");
+                        while (true) {
+                            caracter = advance();
+
+                            if (caracter == '*') {
+                                caracter = advance();
+
+                                if (caracter == '/') {
+                                    break;
+                                }
+                            }
+                            column++;
+                            if (caracter == '\n') {
+                                line++;
+                                column = 0;
+                            }
+                            if (isAtEnd()) {
+                                ErrorLex.errorDec(line, column, "NO CIERRA COMENTARIO MULTILINEA", String.valueOf(c));
+                                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                            }
+
+                        }
+                        return nextToken();
+                    } else {
+                        System.out.println("ENTRE EN EL BLOQUE DE DIVISION");
+                        start = current - 1;
+                        return addToken(SLASH);
+                    }
                 }
 
             case '|':
@@ -393,3 +422,4 @@ public class Escaner {
 
 
 }
+
