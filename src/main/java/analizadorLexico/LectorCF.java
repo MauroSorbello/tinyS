@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 
 public class LectorCF {
     private RandomAccessFile raf;  // Atributo de la clase
+    private int current=0;
+    private StringBuilder source= new StringBuilder();
 
     public void lectorArchivo(String ruta) throws IOException {
         try {
@@ -14,8 +16,6 @@ public class LectorCF {
             throw new IOException(e.getMessage());
         }
     }
-    private static int current=0;
-    private static StringBuilder source= new StringBuilder();
 
     public String rechargeBuffer() throws IOException {
         int caracter;

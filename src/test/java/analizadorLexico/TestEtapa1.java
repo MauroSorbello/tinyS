@@ -45,62 +45,84 @@ public class TestEtapa1 {
 
 
 
-//    @Test
-//    public void testBuffer() throws IOException {
-//
-//        List<TokenType> tiposEsperados = Arrays.asList(
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.IDOBJETS,
-//                TokenType.EOF
-//        );
-//
-//
-//        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testBuffer.s");
-//
-//        for (int i = 0; i < tokens.size(); i++) {
-//            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
-//                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
-//                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
-//        }
-//    }
+    @Test
+    public void testBuffer() throws IOException {
+
+        List<TokenType> tiposEsperados = Arrays.asList(
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.IDOBJETS,
+                TokenType.EOF
+        );
+
+
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testBuffer.s");
+
+        for (int i = 0; i < tokens.size(); i++) {
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
+                    "Error en el test de buffer "+
+                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
+        }
+    }
 
     @Test
     public void testPalabrasClavesYSignos() throws IOException {
 
         List<TokenType> tiposEsperados = Arrays.asList(
-                TokenType.IF,
-                TokenType.WHILE,
-                TokenType.ELSE,
                 TokenType.CLASS,
+                TokenType.IMPL,
+                TokenType.ELSE,
+                TokenType.FALSE,
+                TokenType.IF,
+                TokenType.RET,
+                TokenType.WHILE,
+                TokenType.TRUE,
+                TokenType.NEW,
+                TokenType.FN,
+                TokenType.ST,
+                TokenType.PUB,
+                TokenType.SELF,
+                TokenType.SEMICOLON,
+                TokenType.DOT,
+                TokenType.COMMA,
+                TokenType.LEFT_PAREN,
+                TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE,
+                TokenType.RIGHT_BRACE,
+                TokenType.LEFT_BRACKET,
+                TokenType.RIGHT_BRACKET,
                 TokenType.EOF
         );
 
 
         List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testPalabrasClaves.s");
+//        for (int i = 0; i < tokens.size(); i++) {
+//            System.out.println(tokens.get(i).getType());
+//        }
 
         for (int i = 0; i < tokens.size(); i++) {
             assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
-                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
-                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
+                    "Error en el test de palabras claves "+
+                            "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
         }
     }
 
 
 
     @Test
-    public void testEscanerDesdeArchivo() throws IOException {
+    public void testFibonacci() throws IOException {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -356,12 +378,13 @@ public class TestEtapa1 {
         );
 
 
-        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testc.s");
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testFibonacci.s");
 
         for (int i = 0; i < tokens.size(); i++) {
             assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
-                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
-                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
+                    "Error en el test de Fibonacci "+
+                            "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
         }
     }
 }
