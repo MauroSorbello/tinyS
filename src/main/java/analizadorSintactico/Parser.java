@@ -527,11 +527,11 @@ public class Parser {
 //////////////////////////////ARREGLAR///////////////////////////////////////////////////////////////////////
     private void sentencia_else()throws IOException{
         TokenType type = currentToken.getType();
-        if(type == ELSE || type == RIGHT_BRACE){
+        if(type == ELSE){
             macheo(ELSE);
             sentencia();
         }else{
-            if(type == ELSE || type == RIGHT_BRACE){
+            if( type == RIGHT_BRACE){
                 return;
             }else{
                 throw new IOException("Se espera la finalizacion de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
