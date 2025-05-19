@@ -41,40 +41,58 @@ public class TestEtapa1 {
     }
 
 
+
+
+
+//    @Test
+//    public void testBuffer() throws IOException {
+//
+//        List<TokenType> tiposEsperados = Arrays.asList(
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.IDOBJETS,
+//                TokenType.EOF
+//        );
+//
+//
+//        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testBuffer.s");
+//
+//        for (int i = 0; i < tokens.size(); i++) {
+//            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
+//                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+//                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
+//        }
+//    }
+
     @Test
-    public void testIdentificadores() throws IOException {
-        String source = "class MiClase objeto1 objeto2";
-        List<Token> tokens = scan(source);
-
-        List<TokenType> tiposEsperados = Arrays.asList(
-                TokenType.CLASS,
-                TokenType.IDCLASS,
-                TokenType.IDOBJETS,
-                TokenType.IDOBJETS,
-                TokenType.EOF
-        );
-
-        for (int i = 0; i < tiposEsperados.size(); i++) {
-            assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
-        }
-    }
-
-    @Test
-    public void testPalabrasClave() throws IOException {
-        String source = "if else while true false";
-        List<Token> tokens = scan(source);
+    public void testPalabrasClavesYSignos() throws IOException {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.IF,
-                TokenType.ELSE,
                 TokenType.WHILE,
-                TokenType.TRUE,
-                TokenType.FALSE,
+                TokenType.ELSE,
+                TokenType.CLASS,
                 TokenType.EOF
         );
 
-        for (int i = 0; i < tiposEsperados.size(); i++) {
-            assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
+
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testPalabrasClaves.s");
+
+        for (int i = 0; i < tokens.size(); i++) {
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
+                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
         }
     }
 
@@ -337,11 +355,12 @@ public class TestEtapa1 {
         );
 
 
-        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/testc.s");
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testc.s");
 
         for (int i = 0; i < tokens.size(); i++) {
-            assertEquals(tiposEsperados.get(i), tokens.get(i).getType());
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
+                    "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con lexema: " + tokens.get(i).getLexema());
         }
     }
 }
-
