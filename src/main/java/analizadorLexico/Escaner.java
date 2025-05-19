@@ -1,17 +1,14 @@
 package analizadorLexico;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static analizadorLexico.TokenType.*;
 
+
 public class Escaner {
-    private String source;
-    private final List<Token> tokens = new ArrayList<>();
-    ErrorLex error = new ErrorLex();
+    private String buffer;
     private LectorCF lectorCF;
 
     private int start = 0;
@@ -31,7 +28,7 @@ public class Escaner {
         keywords.put("true", TRUE);
         keywords.put("false", FALSE);
         keywords.put("new", NEW);
-        keywords.put("return", RET);
+        keywords.put("ret", RET);
         keywords.put("self", SELF);
         keywords.put("pub", PUB);
         keywords.put("nil", NIL);
@@ -45,118 +42,127 @@ public class Escaner {
         keywords.put("start", START);
         keywords.put("void", VOID);
         keywords.put("€", END);
+
     }
 
-    Escaner(String source) {
-        this.source = source;
+    Escaner(String buffer) {
+        this.buffer = buffer;
     }
+
+
+    Escaner(String buffer, LectorCF lectorCF) {
+        this.buffer = buffer;
+        this.lectorCF = lectorCF;
+    }
+
+    Escaner(LectorCF lectorCF) {
+        this.lectorCF = lectorCF;
+    }
+
+    Escaner() {}
 
     public void setEscaner(LectorCF lectorCF) {
         this.lectorCF = lectorCF;
     }
 
-    Escaner(String source, LectorCF lectorCF) {
-        this.source = source;
-        this.lectorCF = lectorCF;
+    public void setBuffer(String buffer) {
+        this.buffer = buffer;
     }
 
-    Escaner() {
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public List<Token> scanTokens() throws IOException {
-        while (!isAtEnd()) {
-
-            //Empezamos un nuevo lexema
-            start = current;
-            nextToken();
-        }
-
-        tokens.add(new Token(END, "", column, line));
-        return tokens;
-
-    }
+//    public List<Token> scanTokens() throws IOException {
+//        while (!isAtEnd()) {
+//
+//            //Empezamos un nuevo lexema
+//            start = current;
+//            nextToken();
+//        }
+//        nextToken();
+//        nextToken();
+//        nextToken();
+//        return tokens;
+//
+//    }
 
     private boolean isAtEnd() throws IOException {
         //return current >= source.length();
         if (current == 2048) {
-            source = lectorCF.rechargeBuffer();
+            buffer = lectorCF.rechargeBuffer();
         }
-        return source.charAt(current + 1) == '€';
+        return buffer.charAt(current) == '€';
     }
 
     public Token nextToken() throws IOException {
         char c = advance();
         switch (c) {
             case '(':
+                start=current-1;
                 return addToken(LEFT_PAREN);
 
             case ')':
+                start=current-1;
                 return addToken(RIGHT_PAREN);
 
-            case '%':
-                return addToken(PERCENTAGE);
-
             case ',':
+                start=current-1;
                 return addToken(COMMA);
 
             case '.':
+                start=current-1;
                 return addToken(DOT);
 
             case ':':
+                start=current-1;
                 return addToken(DOBLE_DOT);
 
             case '*':
+                start=current-1;
                 return addToken(MULT);
 
             case ';':
+                start=current-1;
                 return addToken(SEMICOLON);
 
             case '{':
+                start=current-1;
                 return addToken(LEFT_BRACE);
 
             case '}':
+                start=current-1;
                 return addToken(RIGHT_BRACE);
 
             case '[':
+                start=current-1;
                 return addToken(LEFT_BRACKET);
 
             case ']':
+                start=current-1;
                 return addToken(RIGHT_BRACKET);
+            case '€':
+                start=current;
+                return addToken(EOF);
 
             case '+':
+                start=current-1;
                 return addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
-            case '&':
-                if(nextMatch('&')){
-                    return addToken(AND);
-                } else {
-                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
-                }
-            case '|':
-                if(nextMatch('|')){
-                    return addToken(OR);
-                } else {
-                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
-                }
 
             case '-':
+                start=current-1;
                 return addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
 
             case '!':
+                start=current-1;
                 return addToken(nextMatch('=') ? NOT_EQUAL : NOT);
 
             case '=':
+                start=current-1;
                 return addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
 
             case '>':
+                start=current-1;
                 return addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
 
             case '<':
+                start=current-1;
                 return addToken(nextMatch('=') ? LESS_EQUAL : LESS);
 
             case '/':
@@ -168,20 +174,16 @@ public class Escaner {
                     line = line + 1;
                     return nextToken();
                 } else {
+                    start=current-1;
                     return addToken(SLASH);
                 }
-
 
             //literales cadenas
             case '"':
                 return string();
 
 
-            case ' ':
-                return nextToken();
-            case '\t':
-                return nextToken();
-            case '\r':
+            case ' ', '\t', '\r':
                 return nextToken();
             case '\n':
                 column=0;
@@ -207,19 +209,19 @@ public class Escaner {
     //Avanza al proximo caracter
     private char advance() throws IOException {
         if (isAtEnd()) return '€';
-        if (column >= source.length()) {
-            source=lectorCF.rechargeBuffer();
+        if (column >= buffer.length()) {
+            buffer =lectorCF.rechargeBuffer();
             current = 0;
         }
         column++;
-        return source.charAt(current++);
+        return buffer.charAt(current++);
 
     }
 
     //miramos el siguiente sin consumirlo
     private char look() throws IOException {
         if (isAtEnd()) return '€';
-        return source.charAt(current);
+        return buffer.charAt(current);
     }
 
     //agrega un token sin literal
@@ -229,15 +231,14 @@ public class Escaner {
 
     //agrega un token
     private Token addToken(TokenType type){
-        String text = source.substring(start,current);
-        Token token = new Token(type,text,column,line);
-        tokens.add(token);
-        return token;
+        String text = buffer.substring(start,current);
+        //tokens.add(token);
+        return new Token(type,text,column,line);
     }
 
     private boolean nextMatch(char expected) throws IOException {
         if (isAtEnd()) return false;
-        if (source.charAt(current) != expected) return false;
+        if (buffer.charAt(current) != expected) return false;
         column++;
         current++;
         return true;
@@ -277,13 +278,12 @@ public class Escaner {
             advance();
         }
         if (isAtEnd()) {
-            ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", source.substring(start + 1, current - 1));
+            ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", buffer.substring(start + 1, current - 1));
             throw new IOException("Cadena sin terminar en línea " + line + ", columna " + column);
         }
 
         advance();
 
-        String value = source.substring(start + 1, current - 1);
         return addToken(STRING_LITERAL);
     }
 
@@ -303,13 +303,13 @@ public class Escaner {
                 isDouble = true;
             }else {
 
-                ErrorLex.errorDec(line, column, "DOUBLE INVALID", source.substring(start + 1, current - 1));
+                ErrorLex.errorDec(line, column, "DOUBLE INVALID", buffer.substring(start + 1, current - 1));
                 throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
         }
         if(isAlpha(look())) {
 
-            ErrorLex.errorDec(line, column, "CARACTER INVALIDO", source.substring(start + 1, current - 1));
+            ErrorLex.errorDec(line, column, "CARACTER INVALIDO", buffer.substring(start + 1, current - 1));
             throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
 
         }
@@ -326,7 +326,7 @@ public class Escaner {
 
     private char lookNext() throws IOException {
         if(isAtEnd()) return '€';
-        return source.charAt(current+1);
+        return buffer.charAt(current+1);
     }
 
     private boolean isAlphaCapital(char c){
@@ -349,12 +349,13 @@ public class Escaner {
     }
 
     private Token identifier(char c) throws IOException {
+        start=current-1;
         boolean identificadorTipo = isAlphaCapital(c);
 
         while (isAlphaNumeric(look())){
             advance();
         }
-        String text = source.substring(start,current);
+        String text = buffer.substring(start,current);
         if (keywords.containsKey(text)){
             return addToken(keywords.get(text));
         }else{

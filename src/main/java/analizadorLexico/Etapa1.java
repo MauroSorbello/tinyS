@@ -1,6 +1,7 @@
 package analizadorLexico;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Etapa1 {
@@ -12,9 +13,15 @@ public class Etapa1 {
         escaner.setEscaner(lector);
         lector.lectorArchivo("C:/Users/Mauro Sorbello/Documents/FACULTAD/4 AÑO/Compiladores/tiny/tinyS/src/test/java/analizadorLexico/testb.s");
         source = lector.rechargeBuffer();
-        escaner.setSource(source);
+        escaner.setBuffer(source);
 
-        List<Token> tokens = escaner.scanTokens();
+        List<Token> tokens = new ArrayList<>();
+        Token tokenActual;
+
+        do {
+            tokenActual = escaner.nextToken();
+            tokens.add(tokenActual);
+        } while (tokenActual.getType() != TokenType.EOF);
 
         for (Token i : tokens)
         {
