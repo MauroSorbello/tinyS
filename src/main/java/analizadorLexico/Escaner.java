@@ -41,7 +41,7 @@ public class Escaner {
         keywords.put("Str", STR);
         keywords.put("start", START);
         keywords.put("void", VOID);
-        keywords.put("€", END);
+        keywords.put("€", EOF);
 
     }
 
