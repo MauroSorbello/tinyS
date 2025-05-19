@@ -33,7 +33,7 @@ public class TestUnit {
     void testCasoExitoso() throws IOException {
         String source;
         escaner.setEscaner(lector);
-        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/test.s");
+        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testPalabrasClaves.s");
         source = lector.rechargeBuffer();
         escaner.setBuffer(source);
 
