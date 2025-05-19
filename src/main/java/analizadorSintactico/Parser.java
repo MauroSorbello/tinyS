@@ -16,6 +16,14 @@ public class Parser {
     private Token lookaheadToken;
     private boolean hasLookahead = false;
 
+    public void setEscaner(Escaner escaner){
+        this.escaner = escaner;
+    }
+
+    public void setCurrentToken (Token currentToken) {
+        this.currentToken = currentToken;
+    }
+
     public void macheo(TokenType tokenType) throws IOException {
         if (currentToken.getType() == tokenType){
             if (hasLookahead) {
@@ -36,11 +44,12 @@ public class Parser {
         return lookaheadToken;
     }
 
-    private void s() throws ErrorLex, IOException {
+    public boolean s() throws ErrorLex, IOException {
         TokenType type = currentToken.getType();
         if (type == CLASS || type == IMPL){
             program();
             macheo(EOF);
+            return true;
         }
         throw new IOException("TOKEN INVALIDO en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
     }
