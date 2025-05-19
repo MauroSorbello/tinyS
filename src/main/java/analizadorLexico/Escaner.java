@@ -181,7 +181,7 @@ public class Escaner {
                     if (nextMatch('*')) {
                         //Pasamos de largo el comentario
                         char caracter;
-                        System.out.println("ENTRE EN EL BLOQUE DE COMENTARIO");
+
                         while (true) {
                             caracter = advance();
 
@@ -205,7 +205,7 @@ public class Escaner {
                         }
                         return nextToken();
                     } else {
-                        System.out.println("ENTRE EN EL BLOQUE DE DIVISION");
+
                         start = current - 1;
                         return addToken(SLASH);
                     }
