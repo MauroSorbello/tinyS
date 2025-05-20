@@ -1,6 +1,6 @@
 class Fibonacci{
  pub Int suma;
-pub Int i,j;
+ pub Int i,j;
  }
  impl Fibonacci {
  fn Int sucesion_fib ( Int n ){
