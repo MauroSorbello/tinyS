@@ -37,12 +37,11 @@ public class Parser {
     }
 
     //Leer token sin consumirlo
-    private Token peekToken() throws IOException {
+    private void peekToken() throws IOException {
         if (!hasLookahead) {
             lookaheadToken = escaner.nextToken();
             hasLookahead = true;
         }
-        return lookaheadToken;
     }
 
     public boolean s() throws ErrorLex, IOException {
