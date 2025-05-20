@@ -14,7 +14,7 @@ public class Etapa2 {
     public static void main(String[] args) throws IOException, ErrorLex {
         String source;
         escaner.setEscaner(lector);
-        lector.lectorArchivo("C:/Users/Mauro Sorbello/Documents/FACULTAD/4 AÑO/Compiladores/tiny/tinyS/src/test/resources/testc.s");
+        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testFibonacci.s");
         source = lector.rechargeBuffer();
         escaner.setBuffer(source);
         parser.setEscaner(escaner);

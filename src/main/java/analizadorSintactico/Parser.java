@@ -33,15 +33,15 @@ public class Parser {
                 currentToken = escaner.nextToken();
             }
         }
+
     }
 
     //Leer token sin consumirlo
-    private Token peekToken() throws IOException {
+    private void peekToken() throws IOException {
         if (!hasLookahead) {
             lookaheadToken = escaner.nextToken();
             hasLookahead = true;
         }
-        return lookaheadToken;
     }
 
     public boolean s() throws ErrorLex, IOException {
@@ -158,6 +158,7 @@ public class Parser {
 
     private void atributo_class_recursivo() throws IOException{
         TokenType type = currentToken.getType();
+
         if(type == IDCLASS || type == PUB || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             atributo();
             atributo_class_recursivo();
@@ -177,6 +178,7 @@ public class Parser {
             macheo(LEFT_BRACE);
             miembro();
             miembro_impl_recursivo();
+            macheo(RIGHT_BRACE);
         }else{
             throw new IOException("Se espera un impl en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
         }
@@ -232,11 +234,13 @@ public class Parser {
         if(type == IDCLASS || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo();
             lista_declaraciones_variables();
+            macheo(SEMICOLON);
         }else{
             if(type == PUB){
                 visibilidad();
                 tipo();
                 lista_declaraciones_variables();
+                macheo(SEMICOLON);
             }else{
                 throw new IOException("Se espera un atributo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
             }
@@ -307,6 +311,7 @@ public class Parser {
 
     private void decl_var_loc_bloque_recursivo() throws IOException{
         TokenType type = currentToken.getType();
+
         if(type == IDCLASS  || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY ){
             decl_var_locales();
             decl_var_loc_bloque_recursivo();
@@ -318,7 +323,7 @@ public class Parser {
             }
         }
     }
-
+// Corroborar id
     private void sentencia_bloque_recursivo() throws IOException{
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE || type == SEMICOLON || type == LEFT_PAREN || type== IF || type == WHILE || type == RET || type == IDOBJETS || type == SELF){
@@ -338,6 +343,7 @@ public class Parser {
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
             lista_declaraciones_variables();
+            macheo(SEMICOLON);
         }else{
             throw new IOException("Se espera una declaracion de variables locales en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
         }
@@ -378,7 +384,7 @@ public class Parser {
 
     private void lista_argumentos_formales_factorizado() throws IOException{
         TokenType type = currentToken.getType();
-        if(type == LEFT_PAREN){
+        if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             lista_argumentos_formales();
         }else{
             if(type == RIGHT_PAREN){
@@ -391,7 +397,8 @@ public class Parser {
 
     private void lista_argumentos_formales() throws IOException{
 
-        if(currentToken.getType() == LEFT_PAREN){
+        TokenType type = currentToken.getType();
+        if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             argumento_formal();
             lista_argumentos_formales_pr();
         }else{
@@ -414,7 +421,7 @@ public class Parser {
     }
     private void argumento_formal() throws IOException{
         TokenType type = currentToken.getType();
-        if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
+        if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
             macheo(IDOBJETS);
         }else{
@@ -490,7 +497,7 @@ public class Parser {
             throw new IOException("Se espera un tipo arreglo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
         }
     }
-
+// corroborar asignacion ID
     private void sentencia() throws IOException{
         TokenType type = currentToken.getType();
         if(type == IF){
@@ -577,7 +584,7 @@ public class Parser {
 
     private void asignacion() throws IOException{
         TokenType type = currentToken.getType();
-        if(type == IDOBJETS){
+        if(type == IDOBJETS ){
             accesoVar_simple();
             macheo(EQUAL);
             expOr();
@@ -593,17 +600,23 @@ public class Parser {
     }
 
     private void accesoVar_simple() throws IOException{
-        if(currentToken.getType() == IDOBJETS){
+        TokenType type = currentToken.getType();
+        if(type == IDOBJETS){
             macheo(IDOBJETS);
             accesoVar_simple_pr();
+
         }else{
+
             throw new IOException("Se espera un identificador en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+
+
+
         }
     }
 
     private void accesoVar_simple_pr() throws IOException{
         TokenType type = currentToken.getType();
-        if(type == DOT){
+        if(type == DOT || type == EQUAL){
             encadenado_simple_recursivo();
         }else{
             if(type == LEFT_BRACKET){
@@ -676,7 +689,7 @@ public class Parser {
             expAnd();
             expOrPr();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -699,7 +712,7 @@ public class Parser {
         if(type == AND) {
             expIgual();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -724,7 +737,7 @@ public class Parser {
             expCompuesta();
             expIgualPr();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -748,7 +761,7 @@ public class Parser {
             opCompuesta();
             expAd();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL_EQUAL) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -773,7 +786,7 @@ public class Parser {
             expMul();
             expAdPr();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -798,7 +811,7 @@ public class Parser {
             expUn();
             expMulPr();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == LEFT_PAREN || type == LEFT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
@@ -943,7 +956,7 @@ public class Parser {
         if(type == DOT) {
             encadenado();
         }else {
-            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == LEFT_BRACKET || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV) {
+            if (type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == OR || type == AND || type == NOT_EQUAL || type == EQUAL_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == LEFT_BRACKET || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV) {
                 return;
             } else {
                 throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
