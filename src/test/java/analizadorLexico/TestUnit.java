@@ -33,7 +33,7 @@ public class TestUnit {
     void testCasoExitoso() throws IOException {
         String source;
         escaner.setEscaner(lector);
-        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testPalabrasClaves.s");
+        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/comentarios.s");
         source = lector.rechargeBuffer();
         escaner.setBuffer(source);
 
@@ -51,8 +51,8 @@ public class TestUnit {
             for (Token i : tokens) {
                 String tokenString = i.toString();
 
-                System.out.println("TokenType."+ i.getType() +",");
-                //System.out.println(tokenString);
+                //System.out.println("TokenType."+ i.getType() +",");
+                System.out.println(tokenString);
 
 
                 writer.write(tokenString);
