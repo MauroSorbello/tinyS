@@ -1,15 +1,12 @@
 package analizadorLexico;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 public class Etapa1 {
     static Escaner escaner = new Escaner();
     static LectorCF lector = new LectorCF();
-
     public static void main(String[] args) throws IOException, ErrorLex {
         String source;
         escaner.setEscaner(lector);
@@ -27,8 +24,8 @@ public class Etapa1 {
         String nombreArchivoSalida = args[0].replace(".s", ".txt");
         if (args.length == 2) {
             nombreArchivoSalida = args[1];
-        } else {
-            if (args.length > 2) {
+        }else{
+            if(args.length > 2){
                 System.out.println("Por favor, solo proporcionar la ruta del archivo de entrada y salida como argumento.");
             }
         }
@@ -54,15 +51,14 @@ public class Etapa1 {
                             //System.err.println("Error: tokenActual es nulo");
                             break; // Salir del bucle si no se puede obtener un token válido
                         }
-                    } catch (IOException | ErrorLex e) {
-                        // Cerrar el writer antes de sobreescribir el archivo
+                    } catch (ErrorLex e) {
                         if (writer != null) {
                             writer.close();
+                            writer = new BufferedWriter(new FileWriter(nombreArchivoSalida, false));
                         }
-                        // Sobreescribir el archivo con el mensaje de error
-                        writer = new BufferedWriter(new FileWriter(nombreArchivoSalida, false)); // El 'false' indica sobreescritura
                         writer.write("ERROR: LEXICO\n" + e.getMessage());
-                        break; // Salir del bucle después de escribir el error
+                        System.err.println("Error: " + e.getMessage()); // Mostrar el error en la consola
+                        tokenActual = new Token(TokenType.EOF, "", 0, 0);
                     }
                 } while (tokenActual.getType() != TokenType.EOF);
             } catch (IOException e) {

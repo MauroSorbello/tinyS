@@ -17,7 +17,7 @@ public class LectorCF {
         }
     }
 
-    public String rechargeBuffer() throws  IOException {
+    public String rechargeBuffer() throws IOException {
         int caracter;
         try {
             this.raf.seek(current);
