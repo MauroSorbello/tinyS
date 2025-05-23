@@ -197,7 +197,7 @@ public class Escaner {
                                 column = 0;
                             }
                             if (isAtEnd()) {
-                                ErrorLex.errorDec(line, column, "NO CIERRA COMENTARIO MULTILINEA", String.valueOf(c));
+                                throw new ErrorLex(line, column, "NO CIERRA COMENTARIO MULTILINEA", String.valueOf(c));
                                 //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
                             }
 
@@ -216,7 +216,7 @@ public class Escaner {
                     //Pasamos de largo el comentario
                     return addToken(OR);
                 } else {
-                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new ErrorLex(line, column, "CARACTER INVALIDO", String.valueOf(c));
                     //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
                 }
 
@@ -226,7 +226,7 @@ public class Escaner {
                     //Pasamos de largo el comentario
                     return addToken(AND);
                 } else {
-                    ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                    throw new ErrorLex(line, column, "CARACTER INVALIDO", String.valueOf(c));
                 }
                 //literales cadenas
             case '"':
@@ -248,13 +248,12 @@ public class Escaner {
             if (isAlpha(c)) {
                 return identifier(c);
             } else {
-                ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
+                throw new ErrorLex(line, column, "CARACTER INVALIDO", String.valueOf(c));
                 //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
 
         }
 
-        return null;
     }
 
 
@@ -330,7 +329,7 @@ public class Escaner {
             advance();
         }
         if (isAtEnd()) {
-            ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", buffer.substring(start + 1, current - 1));
+            throw new ErrorLex(line, column, "STRING SIN TERMINAR", buffer.substring(start + 1, current - 1));
         }
 
         advance();
@@ -354,12 +353,12 @@ public class Escaner {
                 isDouble = true;
             }else {
 
-                ErrorLex.errorDec(line, column, "DOUBLE INVALID", buffer.substring(start + 1, current - 1));
+                throw new ErrorLex(line, column, "DOUBLE INVALID", buffer.substring(start + 1, current - 1));
             }
         }
         if(isAlpha(look())) {
 
-            ErrorLex.errorDec(line, column, "CARACTER INVALIDO", buffer.substring(start + 1, current - 1));
+            throw new ErrorLex(line, column, "CARACTER INVALIDO", buffer.substring(start + 1, current - 1));
         }
 
         while (isDigit(look())) advance();

@@ -51,7 +51,7 @@ public class Etapa1 {
                             //System.err.println("Error: tokenActual es nulo");
                             break; // Salir del bucle si no se puede obtener un token válido
                         }
-                    } catch (IOException e) {
+                    } catch (ErrorLex e) {
                         if (writer != null) {
                             writer.close();
                             writer = new BufferedWriter(new FileWriter(nombreArchivoSalida, false));
@@ -59,14 +59,10 @@ public class Etapa1 {
                         writer.write("ERROR: LEXICO\n" + e.getMessage());
                         System.err.println("Error: " + e.getMessage()); // Mostrar el error en la consola
                         tokenActual = new Token(TokenType.EOF, "", 0, 0);
-                    } catch (ErrorLex e) {
-                        throw new RuntimeException(e);
                     }
                 } while (tokenActual.getType() != TokenType.EOF);
             } catch (IOException e) {
                 System.err.println("Error al escribir en el archivo de salida: " + e.getMessage());
-            } catch (ErrorLex e) {
-                throw new RuntimeException(e);
             }
         } catch (IOException e) {
             System.err.println("Error al abrir el archivo de salida: " + e.getMessage());

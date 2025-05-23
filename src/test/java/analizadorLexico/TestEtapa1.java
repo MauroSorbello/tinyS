@@ -56,7 +56,7 @@ public class TestEtapa1 {
     public void testCaracterInvalido() throws IOException, ErrorLex{
         String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
 
-        IOException exception = assertThrows(IOException.class, () -> {
+        ErrorLex exception = assertThrows(ErrorLex.class, () -> {
             scan(path); // Esta llamada debe lanzar la excepción
         });
 
