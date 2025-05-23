@@ -53,74 +53,10 @@ public class TestEtapa1 {
 
 
     @Test
-    public void testCaracterInvalido() {
+    public void testCaracterInvalido() throws IOException, ErrorLex{
         String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
 
         IOException exception = assertThrows(IOException.class, () -> {
-            scan(path); // Esta llamada debe lanzar la excepción
-        });
-
-        String mensaje = exception.getMessage();
-        assertTrue(mensaje.contains("CARACTER INVALIDO"),
-                "Se esperaba un mensaje que contenga 'CARACTER INVALIDO' pero fue: " + mensaje);
-    }
-    @Test
-    public void testComentarios() throws IOException {
-
-        List<TokenType> tiposEsperados = Arrays.asList(
-                TokenType.INT,
-                TokenType.IDOBJETS,
-                TokenType.EQUAL,
-                TokenType.INTEGER_LITERAL,
-                TokenType.SEMICOLON,
-                TokenType.INT,
-                TokenType.IDOBJETS,
-                TokenType.EQUAL,
-                TokenType.INTEGER_LITERAL,
-                TokenType.SEMICOLON,
-                TokenType.IDCLASS,
-                TokenType.IDOBJETS,
-                TokenType.EQUAL,
-                TokenType.STRING_LITERAL,
-                TokenType.SEMICOLON,
-                TokenType.IDCLASS,
-                TokenType.IDOBJETS,
-                TokenType.EQUAL,
-                TokenType.TRUE,
-                TokenType.SEMICOLON,
-                TokenType.IDOBJETS,
-                TokenType.EQUAL,
-                TokenType.IDOBJETS,
-                TokenType.PLUS,
-                TokenType.INTEGER_LITERAL,
-                TokenType.MULT,
-                TokenType.INTEGER_LITERAL,
-                TokenType.MINUS,
-                TokenType.LEFT_PAREN,
-                TokenType.INTEGER_LITERAL,
-                TokenType.SLASH,
-                TokenType.INTEGER_LITERAL,
-                TokenType.RIGHT_PAREN,
-                TokenType.SEMICOLON,
-                TokenType.EOF
-        );
-
-
-        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/comentarios.s");
-
-        for (int i = 0; i < tokens.size(); i++) {
-            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
-                    "Error en el test de buffer "+
-                            "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
-                            " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
-        }
-    }
-
-    @Test
-    public void testCaracterInvalido() {
-        String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
-
-        ErrorLex exception = assertThrows(ErrorLex.class, () -> {
             scan(path); // Esta llamada debe lanzar la excepción
         });
 
@@ -179,6 +115,8 @@ public class TestEtapa1 {
                             " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
         }
     }
+
+
 
     @Test
     public void testBuffer() throws IOException, ErrorLex {
