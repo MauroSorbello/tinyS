@@ -83,7 +83,7 @@ public class Escaner {
 //
 //    }
 
-    private boolean isAtEnd() throws IOException {
+    private boolean isAtEnd() throws ErrorLex, IOException {
         //return current >= source.length();
         if (current == 2048) {
             buffer = lectorCF.rechargeBuffer();
@@ -91,82 +91,82 @@ public class Escaner {
         return buffer.charAt(current) == '€';
     }
 
-    public Token nextToken() throws IOException {
+    public Token nextToken() throws ErrorLex, IOException {
         char c = advance();
         switch (c) {
             case '(':
-                start=current-1;
+                start = current - 1;
                 return addToken(LEFT_PAREN);
 
             case ')':
-                start=current-1;
+                start = current - 1;
                 return addToken(RIGHT_PAREN);
 
             case ',':
-                start=current-1;
+                start = current - 1;
                 return addToken(COMMA);
 
             case '.':
-                start=current-1;
+                start = current - 1;
                 return addToken(DOT);
 
             case ':':
-                start=current-1;
+                start = current - 1;
                 return addToken(DOBLE_DOT);
 
             case '*':
-                start=current-1;
+                start = current - 1;
                 return addToken(MULT);
 
             case '%':
-                start=current-1;
+                start = current - 1;
                 return addToken(PERCENTAGE);
 
             case ';':
-                start=current-1;
+                start = current - 1;
                 return addToken(SEMICOLON);
 
             case '{':
-                start=current-1;
+                start = current - 1;
                 return addToken(LEFT_BRACE);
 
             case '}':
-                start=current-1;
+                start = current - 1;
                 return addToken(RIGHT_BRACE);
 
             case '[':
-                start=current-1;
+                start = current - 1;
                 return addToken(LEFT_BRACKET);
 
             case ']':
-                start=current-1;
+                start = current - 1;
                 return addToken(RIGHT_BRACKET);
             case '€':
-                start=current;
+                start = current;
                 return addToken(EOF);
 
             case '+':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('+') ? PLUS_PLUS : PLUS);
 
             case '-':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('-') ? MINUS_MINUS : MINUS);
 
             case '!':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('=') ? NOT_EQUAL : NOT);
 
             case '=':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('=') ? EQUAL_EQUAL : EQUAL);
 
             case '>':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('=') ? GREATER_EQUAL : GREATER);
 
             case '<':
-                start=current-1;
+                start = current - 1;
                 return addToken(nextMatch('=') ? LESS_EQUAL : LESS);
 
             case '/':
@@ -174,7 +174,7 @@ public class Escaner {
                 if (nextMatch('/')) {
                     //Pasamos de largo el comentario
                     while (look() != '\n' && !isAtEnd()) advance();
-                    column=0;
+                    column = 0;
                     line = line + 1;
                     return nextToken();
                 } else {
@@ -199,7 +199,7 @@ public class Escaner {
                             }
                             if (isAtEnd()) {
                                 ErrorLex.errorDec(line, column, "NO CIERRA COMENTARIO MULTILINEA", String.valueOf(c));
-                                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                                //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
                             }
 
                         }
@@ -218,7 +218,7 @@ public class Escaner {
                     return addToken(OR);
                 } else {
                     ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                    //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
                 }
 
             case '&':
@@ -228,9 +228,8 @@ public class Escaner {
                     return addToken(AND);
                 } else {
                     ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-                    throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
                 }
-            //literales cadenas
+                //literales cadenas
             case '"':
                 return string();
 
@@ -238,7 +237,7 @@ public class Escaner {
             case ' ', '\t', '\r':
                 return nextToken();
             case '\n':
-                column=0;
+                column = 0;
                 line++;
                 return nextToken();
             //case '\v': No lo toma
@@ -251,15 +250,17 @@ public class Escaner {
                 return identifier(c);
             } else {
                 ErrorLex.errorDec(line, column, "CARACTER INVALIDO", String.valueOf(c));
-                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
+                //throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
 
         }
 
+        return null;
     }
 
+
     //Avanza al proximo caracter
-    private char advance() throws IOException {
+    private char advance() throws ErrorLex, IOException {
         if (isAtEnd()) return '€';
         if (column >= buffer.length()) {
             buffer =lectorCF.rechargeBuffer();
@@ -271,7 +272,7 @@ public class Escaner {
     }
 
     //miramos el siguiente sin consumirlo
-    private char look() throws IOException {
+    private char look() throws ErrorLex, IOException {
         if (isAtEnd()) return '€';
         return buffer.charAt(current);
     }
@@ -288,7 +289,7 @@ public class Escaner {
         return new Token(type,text,column,line);
     }
 
-    private boolean nextMatch(char expected) throws IOException {
+    private boolean nextMatch(char expected) throws ErrorLex, IOException {
         if (isAtEnd()) return false;
         if (buffer.charAt(current) != expected) return false;
         column++;
@@ -321,7 +322,7 @@ public class Escaner {
      *   does not generate a token.
      */
     //
-    private Token string() throws IOException {
+    private Token string() throws ErrorLex, IOException {
         while (look() != '"' && !isAtEnd()) {
             if (look() == '\n') {
                 line++;
@@ -331,7 +332,6 @@ public class Escaner {
         }
         if (isAtEnd()) {
             ErrorLex.errorDec(line, column, "STRING SIN TERMINAR", buffer.substring(start + 1, current - 1));
-            throw new IOException("Cadena sin terminar en línea " + line + ", columna " + column);
         }
 
         advance();
@@ -343,7 +343,7 @@ public class Escaner {
         return c >= '0' && c <= '9';
     }
 
-    private Token number() throws IOException {
+    private Token number() throws ErrorLex, IOException {
         boolean isDouble = false;
         while (isDigit(look())) advance();
 
@@ -356,14 +356,11 @@ public class Escaner {
             }else {
 
                 ErrorLex.errorDec(line, column, "DOUBLE INVALID", buffer.substring(start + 1, current - 1));
-                throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
             }
         }
         if(isAlpha(look())) {
 
             ErrorLex.errorDec(line, column, "CARACTER INVALIDO", buffer.substring(start + 1, current - 1));
-            throw new IOException("CARACTER INVALIDO en línea " + line + ", columna " + column);
-
         }
 
         while (isDigit(look())) advance();
@@ -376,7 +373,7 @@ public class Escaner {
 
     }
 
-    private char lookNext() throws IOException {
+    private char lookNext() throws ErrorLex, IOException {
         if(isAtEnd()) return '€';
         return buffer.charAt(current+1);
     }
@@ -400,7 +397,7 @@ public class Escaner {
                 c == '_';
     }
 
-    private Token identifier(char c) throws IOException {
+    private Token identifier(char c) throws ErrorLex, IOException {
         start=current-1;
         boolean identificadorTipo = isAlphaCapital(c);
 

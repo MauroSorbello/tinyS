@@ -12,6 +12,6 @@ public class ErrorLex extends Exception{
     }
 
     private static void report(int line, int column, String descripcion, String lexema){
-        System.err.println("ERROR: LEXICO | LINEA " + line + "( COLUMNA: " + column + ") | " + descripcion + " " + lexema );
+        System.err.println("| LINEA " + line + "( COLUMNA: " + column + ") | " + descripcion + " " + lexema );
     }
 }

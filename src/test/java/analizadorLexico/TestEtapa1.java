@@ -23,7 +23,7 @@ public class TestEtapa1 {
     }
 
 
-    private List<Token> scan(String source) throws IOException {
+    private List<Token> scan(String source) throws IOException, ErrorLex {
         LectorCF lector = new LectorCF();
         Escaner escaner = new Escaner();
         escaner.setEscaner(lector);
@@ -31,13 +31,21 @@ public class TestEtapa1 {
         String buffer = lector.rechargeBuffer();
         escaner.setBuffer(buffer);
 
-
         List<Token> tokens = new ArrayList<>();
         Token tokenActual;
         do {
             tokenActual = escaner.nextToken();
-            tokens.add(tokenActual);
-        } while (tokenActual.getType() != TokenType.EOF);
+            if (tokenActual != null) {
+                tokens.add(tokenActual);
+                if (tokenActual.getType() == TokenType.EOF) {
+                    break;
+                }
+            } else {
+                // Manejar el caso en que tokenActual es nulo
+                //System.err.println("Error: tokenActual es nulo");
+                break; // Salir del bucle si no se puede obtener un token válido
+            }
+        } while (true);
         return tokens;
     }
 
@@ -109,7 +117,71 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testBuffer() throws IOException {
+    public void testCaracterInvalido() {
+        String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
+
+        ErrorLex exception = assertThrows(ErrorLex.class, () -> {
+            scan(path); // Esta llamada debe lanzar la excepción
+        });
+
+        String mensaje = exception.getMessage();
+        assertTrue(mensaje.contains("CARACTER INVALIDO"),
+                "Se esperaba un mensaje que contenga 'CARACTER INVALIDO' pero fue: " + mensaje);
+    }
+    @Test
+    public void testComentarios() throws IOException, ErrorLex {
+
+        List<TokenType> tiposEsperados = Arrays.asList(
+                TokenType.INT,
+                TokenType.IDOBJETS,
+                TokenType.EQUAL,
+                TokenType.INTEGER_LITERAL,
+                TokenType.SEMICOLON,
+                TokenType.INT,
+                TokenType.IDOBJETS,
+                TokenType.EQUAL,
+                TokenType.INTEGER_LITERAL,
+                TokenType.SEMICOLON,
+                TokenType.IDCLASS,
+                TokenType.IDOBJETS,
+                TokenType.EQUAL,
+                TokenType.STRING_LITERAL,
+                TokenType.SEMICOLON,
+                TokenType.IDCLASS,
+                TokenType.IDOBJETS,
+                TokenType.EQUAL,
+                TokenType.TRUE,
+                TokenType.SEMICOLON,
+                TokenType.IDOBJETS,
+                TokenType.EQUAL,
+                TokenType.IDOBJETS,
+                TokenType.PLUS,
+                TokenType.INTEGER_LITERAL,
+                TokenType.MULT,
+                TokenType.INTEGER_LITERAL,
+                TokenType.MINUS,
+                TokenType.LEFT_PAREN,
+                TokenType.INTEGER_LITERAL,
+                TokenType.SLASH,
+                TokenType.INTEGER_LITERAL,
+                TokenType.RIGHT_PAREN,
+                TokenType.SEMICOLON,
+                TokenType.EOF
+        );
+
+
+        List<Token> tokens = scan("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/comentarios.s");
+
+        for (int i = 0; i < tokens.size(); i++) {
+            assertEquals(tiposEsperados.get(i), tokens.get(i).getType(),
+                    "Error en el test de buffer "+
+                            "Error en el token " + (i + 1) + ": Se esperaba " + tiposEsperados.get(i) +
+                            " pero se obtuvo " + tokens.get(i).getType() + " con " + tokens.get(i).toString());
+        }
+    }
+
+    @Test
+    public void testBuffer() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.IDOBJETS,
@@ -139,7 +211,9 @@ public class TestEtapa1 {
         }
     }
     @Test
-    public void testSecuenciasComplejas() throws IOException {
+
+    public void testSecuenciasComplejas() throws IOException, ErrorLex {
+
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.LEFT_PAREN,
@@ -175,7 +249,9 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testNumerosPares() throws IOException {
+
+    public void testNumerosPares() throws IOException, ErrorLex {
+
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -340,7 +416,9 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testContador() throws IOException {
+
+    public void testContador() throws IOException, ErrorLex {
+
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -458,7 +536,9 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testFactorial() throws IOException {
+
+    public void testFactorial() throws IOException, ErrorLex {
+
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -614,7 +694,9 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testPrimo() throws IOException {
+
+    public void testPrimo() throws IOException, ErrorLex {
+
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -796,7 +878,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testPalabrasClavesYSignos() throws IOException {
+    public void testPalabrasClavesYSignos() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -841,7 +923,7 @@ public class TestEtapa1 {
 
 
     @Test
-    public void testFibonacci() throws IOException {
+    public void testFibonacci() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,

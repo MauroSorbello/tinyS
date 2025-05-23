@@ -30,7 +30,7 @@ public class TestUnit {
      */
 
     @Test
-    void testCasoExitoso() throws IOException {
+    void testCasoExitoso() throws IOException, ErrorLex {
         String source;
         escaner.setEscaner(lector);
         lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/comentarios.s");
