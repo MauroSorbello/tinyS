@@ -1,8 +1,8 @@
 package analizadorLexico;
-
-public class ErrorLex extends Exception{
+import ErrorManage.ErrorTiny;
+public class ErrorLex extends ErrorTiny {
 
     ErrorLex(int line, int column, String descripcion, String lexema){
-        super ("| LINEA " + line + "( COLUMNA: " + column + ") | " + descripcion + " " + lexema );
+        super (line, column, descripcion, lexema);
     }
 }

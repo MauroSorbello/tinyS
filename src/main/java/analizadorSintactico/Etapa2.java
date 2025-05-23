@@ -1,5 +1,6 @@
 package analizadorSintactico;
 
+import ErrorManage.ErrorTiny;
 import analizadorLexico.*;
 
 import java.io.IOException;
@@ -11,10 +12,10 @@ public class Etapa2 {
     static Escaner escaner = new Escaner();
     static LectorCF lector = new LectorCF();
 
-    public static void main(String[] args) throws IOException, ErrorLex {
+    public static void main(String[] args) throws IOException, ErrorTiny {
         String source;
         escaner.setEscaner(lector);
-        lector.lectorArchivo("/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/testFibonacci.s");
+        lector.lectorArchivo("/home/maurosorbello/Documentos/Compiladores/src/test/resources/sintaxisTest/personaBasic.s");
         source = lector.rechargeBuffer();
         escaner.setBuffer(source);
         parser.setEscaner(escaner);

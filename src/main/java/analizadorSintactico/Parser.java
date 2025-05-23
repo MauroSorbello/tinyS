@@ -1,6 +1,8 @@
 package analizadorSintactico;
 
+import ErrorManage.ErrorTiny;
 import analizadorLexico.ErrorLex;
+import ErrorManage.ErrorTiny;
 import analizadorLexico.Escaner;
 import analizadorLexico.Token;
 import analizadorLexico.TokenType;
@@ -24,7 +26,7 @@ public class Parser {
         this.currentToken = currentToken;
     }
 
-    public void macheo(TokenType tokenType) throws IOException, ErrorLex {
+    public void macheo(TokenType tokenType) throws IOException, ErrorTiny {
         if (currentToken.getType() == tokenType){
             if (hasLookahead) {
                 currentToken = lookaheadToken;
@@ -37,7 +39,7 @@ public class Parser {
     }
 
     //Leer token sin consumirlo
-    private void peekToken() throws IOException, ErrorLex {
+    private void peekToken() throws IOException, ErrorTiny {
 
         if (!hasLookahead) {
             lookaheadToken = escaner.nextToken();
@@ -45,36 +47,34 @@ public class Parser {
         }
     }
 
-    public boolean s() throws ErrorLex, IOException {
+    public boolean s() throws ErrorTiny, IOException {
         TokenType type = currentToken.getType();
         if (type == CLASS || type == IMPL){
             program();
             macheo(EOF);
             return true;
         }
-        throw new IOException("TOKEN INVALIDO en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+        throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba class/impl, se encontró " + currentToken.getLexema());
     }
 
-    private void program() throws ErrorLex, IOException {
+    private void program() throws ErrorTiny, IOException {
         TokenType type = currentToken.getType();
         if (type == CLASS || type == IMPL || type == START){
             lista_definiciones();
             start();
         }else{
-            throw new IOException("TOKEN INVALIDO en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba class/impl/start, se encontró " + currentToken.getLexema());        }
     }
-    private void start() throws ErrorLex, IOException {
+    private void start() throws ErrorTiny, IOException {
         if (currentToken.getType() == START){
             macheo(START);
             bloque_metodo();
         }else{
-            throw new IOException("Se espera un metodo start en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba start, se encontró " + currentToken.getLexema());        }
     }
 
 
-    private void lista_definiciones() throws ErrorLex, IOException {
+    private void lista_definiciones() throws ErrorTiny, IOException {
         TokenType type = currentToken.getType();
         if (type == START){
             return;
@@ -85,34 +85,31 @@ public class Parser {
                     if (type == IMPL){
                         impl_lista_recursivo();
                     }else{
-                        throw new IOException("Se espera un metodo start, la definición de una clase o una implementación en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-                    }
+                        throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba start/class/impl, se encontró " + currentToken.getLexema());                    }
             }
         }
 
     }
 
-    private void class_lista_recursivo() throws IOException, ErrorLex {
+    private void class_lista_recursivo() throws IOException, ErrorTiny {
         if (currentToken.getType() == CLASS){
             clas();
             lista_factorizacion();
         }else{
-            throw new IOException("Se espera la palabra clave class en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba class, se encontró " + currentToken.getLexema());        }
     }
 
-    private void impl_lista_recursivo() throws IOException, ErrorLex {
+    private void impl_lista_recursivo() throws IOException, ErrorTiny {
         if(currentToken.getType()==IMPL){
             impl();
             lista_factorizacion();
         }else{
-            throw new IOException("Se espera una implementación en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba impl, se encontró " + currentToken.getLexema());
         }
     }
 
 
-    private void lista_factorizacion() throws IOException, ErrorLex {
+    private void lista_factorizacion() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == CLASS ){
             class_lista_recursivo();
@@ -123,23 +120,21 @@ public class Parser {
                 if(type == START){
                     return;
                 }else{
-                    throw new IOException("Se espera un metodo start en línea, la definición de una clase o una implementación en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-                }
+                    throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba class/impl/start, se encontró " + currentToken.getLexema());                }
             }
         }
     }
 
-    private void clas() throws IOException, ErrorLex {
+    private void clas() throws IOException, ErrorTiny {
         if(currentToken.getType()==CLASS){
             macheo(CLASS);
             macheo(IDCLASS);
             clas_factorizado();
         }else{
-            throw new IOException("Se espera la definición de una clase en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba class, se encontró " + currentToken.getLexema());        }
     }
 
-    private void clas_factorizado() throws IOException, ErrorLex {
+    private void clas_factorizado() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE){
             macheo(LEFT_BRACE);
@@ -152,12 +147,11 @@ public class Parser {
                 atributo_class_recursivo();
                 macheo(RIGHT_BRACE);
             }else{
-                throw new IOException("Se espera la definición de una clase o una herencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba {/:, se encontró " + currentToken.getLexema());            }
         }
     }
 
-    private void atributo_class_recursivo() throws IOException, ErrorLex {
+    private void atributo_class_recursivo() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
 
         if(type == IDCLASS || type == PUB || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
@@ -167,12 +161,11 @@ public class Parser {
             if(type == RIGHT_BRACE){
                 return;
             }else{
-                throw new IOException("Se espera una definicion en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/pub/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());            }
         }
     }
 
-    private void impl() throws IOException, ErrorLex {
+    private void impl() throws IOException, ErrorTiny {
         if(currentToken.getType() == IMPL){
             macheo(IMPL);
             macheo(IDCLASS);
@@ -181,11 +174,10 @@ public class Parser {
             miembro_impl_recursivo();
             macheo(RIGHT_BRACE);
         }else{
-            throw new IOException("Se espera un impl en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba impl, se encontró " + currentToken.getLexema());        }
     }
 
-    private void miembro_impl_recursivo() throws IOException, ErrorLex {
+    private void miembro_impl_recursivo() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == FN || type == ST || type == DOT){
             miembro();
@@ -194,20 +186,18 @@ public class Parser {
             if(type == RIGHT_BRACE){
                 return;
             }else{
-                throw new IOException("La implementación esta incompleta en línea" + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba fn/st/./}, se encontró " + currentToken.getLexema());            }
         }
     }
-    private void herencia() throws IOException, ErrorLex {
+    private void herencia() throws IOException, ErrorTiny {
         if(currentToken.getType() == DOBLE_DOT){
             macheo(DOBLE_DOT);
             tipo();
         }else{
-            throw new IOException("Se esperan dos puntos en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba :, se encontró " + currentToken.getLexema());        }
     }
 
-    private void miembro() throws IOException, ErrorLex {
+    private void miembro() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if (type == FN|| type == ST){
             metodo();
@@ -215,22 +205,20 @@ public class Parser {
             if(type == DOT){
                 constructor();
             }else{
-                throw new IOException("Se espera finalizar el miembro en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba fn/st/., se encontró " + currentToken.getLexema());            }
         }
     }
 
-    private void constructor() throws IOException, ErrorLex {
+    private void constructor() throws IOException, ErrorTiny {
         if (currentToken.getType()==DOT){
             macheo(DOT);
             argumentos_formales();
             bloque_metodo();
         }else{
-            throw new IOException("Se espera un punto en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba ., se encontró " + currentToken.getLexema());        }
     }
 
-    private void atributo() throws IOException, ErrorLex {
+    private void atributo() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo();
@@ -243,12 +231,11 @@ public class Parser {
                 lista_declaraciones_variables();
                 macheo(SEMICOLON);
             }else{
-                throw new IOException("Se espera un atributo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array/pub, se encontró " + currentToken.getLexema());            }
         }
     }
 
-    private void metodo() throws IOException, ErrorLex {
+    private void metodo() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == FN){
             macheo(FN);
@@ -265,12 +252,11 @@ public class Parser {
                 argumentos_formales();
                 bloque_metodo();
             }else{
-                throw new IOException("Se espera un punto en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba fn/st, se encontró " + currentToken.getLexema());            }
         }
     }
 
-    private void tipo_metodo_factorizacion() throws IOException, ErrorLex {
+    private void tipo_metodo_factorizacion() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == VOID || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo_metodo();
@@ -278,39 +264,35 @@ public class Parser {
             if(type == IDOBJETS){
                 return;
             }else{
-                throw new IOException("Se espera un tipo para el método en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array/void/idMetodo/idAtributo, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void visibilidad() throws IOException, ErrorLex {
+    private void visibilidad() throws IOException, ErrorTiny {
         if (currentToken.getType() == PUB){
             macheo(PUB);
         }else{
-            throw new IOException("Se espera una asignacion de visibilidad en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba pub, se encontró " + currentToken.getLexema());          }
     }
 
-    private void forma_metodo() throws IOException, ErrorLex {
+    private void forma_metodo() throws IOException, ErrorTiny {
         if (currentToken.getType() == ST){
             macheo(ST);
         }else{
-            throw new IOException("Se espera la palabra st en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba st, se encontró " + currentToken.getLexema());          }
     }
 
-    private void bloque_metodo() throws IOException, ErrorLex {
+    private void bloque_metodo() throws IOException, ErrorTiny {
         if(currentToken.getType()==LEFT_BRACE){
             macheo(LEFT_BRACE);
             decl_var_loc_bloque_recursivo();
             sentencia_bloque_recursivo();
             macheo(RIGHT_BRACE);
         }else{
-            throw new IOException("Se espera un corchete que abre en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba {, se encontró " + currentToken.getLexema());          }
     }
 
-    private void decl_var_loc_bloque_recursivo() throws IOException, ErrorLex {
+    private void decl_var_loc_bloque_recursivo() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
 
         if(type == IDCLASS  || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY ){
@@ -320,13 +302,12 @@ public class Parser {
             if(type == LEFT_BRACE || type == RIGHT_BRACE || type == SEMICOLON || type == LEFT_PAREN || type == IF || type == WHILE || type == RET || type == IDOBJETS || type == PUB || type == NEW || type == FN || type == ST || type == DOT || type == SELF){
                 return;
             }else{
-                throw new IOException("Se espera una declaracion de variables en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array/{/}/;/(/if/while/ret/idObject/pub/new/fn/st/./self, se encontró " + currentToken.getLexema());              }
         }
     }
 // Corroborar id
 
-    private void sentencia_bloque_recursivo() throws IOException, ErrorLex {
+    private void sentencia_bloque_recursivo() throws IOException, ErrorTiny {
       
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE || type == SEMICOLON || type == LEFT_PAREN || type== IF || type == WHILE || type == RET || type == IDOBJETS || type == SELF){
@@ -336,32 +317,29 @@ public class Parser {
             if(type == RIGHT_BRACE){
                 return;
             }else{
-                throw new IOException("Se espera una sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba {/;/(/if/while/ret/idObjects/self, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void decl_var_locales() throws IOException, ErrorLex {
+    private void decl_var_locales() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
             lista_declaraciones_variables();
             macheo(SEMICOLON);
         }else{
-            throw new IOException("Se espera una declaracion de variables locales en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());          }
     }
 
-    private void lista_declaraciones_variables() throws IOException, ErrorLex {
+    private void lista_declaraciones_variables() throws IOException, ErrorTiny {
         if(currentToken.getType()==IDOBJETS){
             macheo(IDOBJETS);
             lista_declaraciones_variables_Pr();
         }else{
-            throw new IOException("Se espera una lista de declaraciones de variables en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idObjects, se encontró " + currentToken.getLexema());          }
     }
 
-    private void lista_declaraciones_variables_Pr() throws IOException, ErrorLex {
+    private void lista_declaraciones_variables_Pr() throws IOException, ErrorTiny {
         TokenType type = currentToken.getType();
         if (type == COMMA){
             macheo(COMMA);
@@ -370,22 +348,20 @@ public class Parser {
             if(type == SEMICOLON){
                 return;
             }else{
-                throw new IOException("Se espera una nueva declaración o que se finalize la lista en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba ,/;, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void argumentos_formales() throws IOException, ErrorLex {
+    private void argumentos_formales() throws IOException, ErrorTiny {
         if(currentToken.getType()==LEFT_PAREN){
             macheo(LEFT_PAREN);
             lista_argumentos_formales_factorizado();
             macheo(RIGHT_PAREN);
         }else{
-            throw new IOException("Se espera un parentesis en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba (, se encontró " + currentToken.getLexema());          }
     }
 
-    private void lista_argumentos_formales_factorizado() throws IOException, ErrorLex{
+    private void lista_argumentos_formales_factorizado() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             lista_argumentos_formales();
@@ -393,23 +369,21 @@ public class Parser {
             if(type == RIGHT_PAREN){
                 return;
             }else{
-                throw new IOException("Se espera la lista de argumentos en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void lista_argumentos_formales() throws IOException, ErrorLex{
+    private void lista_argumentos_formales() throws IOException, ErrorTiny{
 
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             argumento_formal();
             lista_argumentos_formales_pr();
         }else{
-            throw new IOException("Se espera una lista de argumentos formales en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());          }
     }
 
-    private void lista_argumentos_formales_pr() throws IOException, ErrorLex{
+    private void lista_argumentos_formales_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type==COMMA){
             macheo(COMMA);
@@ -418,22 +392,20 @@ public class Parser {
             if(type==RIGHT_PAREN){
                 return;
             }else{
-                throw new IOException("Se espera un nuevo argumento o la finalizacion de la lista en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba ,/), se encontró " + currentToken.getLexema());              }
         }
     }
-    private void argumento_formal() throws IOException, ErrorLex{
+    private void argumento_formal() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
             macheo(IDOBJETS);
         }else{
-            throw new IOException("Se espera un argumento formal en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());
         }
     }
 
-    private void tipo_metodo() throws IOException, ErrorLex{
+    private void tipo_metodo() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             tipo();
@@ -441,13 +413,12 @@ public class Parser {
             if (type == VOID){
                 macheo(VOID);
             }else{
-                throw new IOException("Se espera un tipo en la declaracion del metodo, en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array/void, se encontró " + currentToken.getLexema());
             }
         }
     }
 
-    private void tipo() throws IOException, ErrorLex{
+    private void tipo() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == STR || type == BOOL || type == INT || type == DOUBLE){
             tipo_primitivo();
@@ -458,13 +429,12 @@ public class Parser {
                 if(type == ARRAY){
                     tipo_arreglo();
                 }else{
-                    throw new IOException("Se espera un tipo valido en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-                }
+                    throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/Str/Bool/Int/Double/Array, se encontró " + currentToken.getLexema());                  }
             }
         }
     }
 
-    private void tipo_primitivo() throws IOException, ErrorLex{
+    private void tipo_primitivo() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type==STR){
             macheo(STR);
@@ -478,31 +448,28 @@ public class Parser {
                     if(type==DOUBLE){
                         macheo(DOUBLE);
                     }else{
-                        throw new IOException("Se espera un tipo primitivo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-                    }
+                        throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba Str/Bool/Int/Double, se encontró " + currentToken.getLexema());                      }
                 }
             }
         }
     }
 
-    private void tipo_referencia() throws IOException, ErrorLex{
+    private void tipo_referencia() throws IOException, ErrorTiny{
         if(currentToken.getType()==IDCLASS){
             macheo(IDCLASS);
         }else{
-            throw new IOException("Se espera un tipo de referecia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass, se encontró " + currentToken.getLexema());          }
     }
 
-    private void tipo_arreglo() throws IOException, ErrorLex{
+    private void tipo_arreglo() throws IOException, ErrorTiny{
         if(currentToken.getType() == ARRAY){
             macheo(ARRAY);
         }else{
-            throw new IOException("Se espera un tipo arreglo en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-        }
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba Array, se encontró " + currentToken.getLexema());          }
     }
 // corroborar asignacion ID
 
-    private void sentencia() throws IOException, ErrorLex{
+    private void sentencia() throws IOException, ErrorTiny{
 
         TokenType type = currentToken.getType();
         if(type == IF){
@@ -539,8 +506,7 @@ public class Parser {
                                 if(type==SEMICOLON){
                                     macheo(SEMICOLON);
                                 }else{
-                                    throw new IOException("Se espera una sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-                                }
+                                    throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba if/while/ret/idObjects/self/(/{/;, se encontró " + currentToken.getLexema());                                  }
                             }
                         }
                     }
@@ -549,7 +515,7 @@ public class Parser {
         }
     }
 
-    private void ExpOr_factorizado() throws IOException, ErrorLex{
+    private void ExpOr_factorizado() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if (type==IDCLASS || type==IDOBJETS || type==PLUS || type==MINUS || type==NOT || type==PLUS_PLUS || type==MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == DOUBLE_LITERAL || type == STRING_LITERAL || type==SELF || type == NEW || type == LEFT_PAREN){
             expOr();
@@ -557,12 +523,11 @@ public class Parser {
             if(type == SEMICOLON){
                 return;
             }else{
-                throw new IOException("Se espera una experesion o la finalización de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba idClass/idObjects/+/-/!/++/--/nil/true/false/int_literal/double_literal/str_literal/new/(, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void sentencia_else()throws IOException, ErrorLex{
+    private void sentencia_else()throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == ELSE){
             macheo(ELSE);
@@ -571,23 +536,22 @@ public class Parser {
             if( type == RIGHT_BRACE){
                 return;
             }else{
-                throw new IOException("Se espera la finalizacion de la sentencia en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
-            }
+                throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba else/}, se encontró " + currentToken.getLexema());              }
         }
     }
 
-    private void bloque() throws IOException, ErrorLex{
+    private void bloque() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if (type == LEFT_BRACE){
             macheo(LEFT_BRACE);
             sentencia_bloque_recursivo();
             macheo(RIGHT_BRACE);
         }else{
-            throw new IOException("Se espera un bloque en línea " + currentToken.getLine() + ", columna " + currentToken.getColumn());
+            throw new ErrorSintactico(currentToken.getLine(), currentToken.getColumn(),"Se esperaba {, se encontró " + currentToken.getLexema());
         }
     }
 
-    private void asignacion() throws IOException, ErrorLex{
+    private void asignacion() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDOBJETS ){
             accesoVar_simple();
@@ -605,7 +569,7 @@ public class Parser {
     }
 
 
-    private void accesoVar_simple() throws IOException, ErrorLex{
+    private void accesoVar_simple() throws IOException, ErrorTiny{
 
         TokenType type = currentToken.getType();
         if(type == IDOBJETS){
@@ -621,7 +585,7 @@ public class Parser {
         }
     }
 
-    private void accesoVar_simple_pr() throws IOException, ErrorLex{
+    private void accesoVar_simple_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT || type == EQUAL){
             encadenado_simple_recursivo();
@@ -636,7 +600,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_simple_recursivo() throws IOException, ErrorLex{
+    private void encadenado_simple_recursivo() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT){
             accesoVar_simple();
@@ -650,7 +614,7 @@ public class Parser {
         }
     }
 
-    private void accesoSelf_simple() throws IOException, ErrorLex{
+    private void accesoSelf_simple() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == SELF){
             macheo(SELF);
@@ -660,7 +624,7 @@ public class Parser {
         }
     }
 
-    private void encadeado_simple() throws IOException, ErrorLex{
+    private void encadeado_simple() throws IOException, ErrorTiny{
         if(currentToken.getType() == DOT){
             macheo(DOT);
             macheo(IDOBJETS);
@@ -669,7 +633,7 @@ public class Parser {
         }
     }
 
-    private void sentencia_simple() throws IOException, ErrorLex{
+    private void sentencia_simple() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN){
             macheo(LEFT_PAREN);
@@ -680,7 +644,7 @@ public class Parser {
         }
     }
 
-    private void expOr() throws IOException, ErrorLex{
+    private void expOr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expAnd();
@@ -690,7 +654,7 @@ public class Parser {
         }
     }
 
-    private void expOrPr() throws IOException, ErrorLex{
+    private void expOrPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == OR) {
             expAnd();
@@ -704,7 +668,7 @@ public class Parser {
         }
     }
 
-    private void expAnd() throws IOException, ErrorLex{
+    private void expAnd() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expIgual();
@@ -714,7 +678,7 @@ public class Parser {
         }
     }
 
-    private void expAndPr() throws IOException, ErrorLex{
+    private void expAndPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == AND) {
             expIgual();
@@ -727,7 +691,7 @@ public class Parser {
         }
     }
 
-    private void expIgual() throws IOException, ErrorLex{
+    private void expIgual() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expCompuesta();
@@ -737,7 +701,7 @@ public class Parser {
         }
     }
 
-    private void expIgualPr() throws IOException, ErrorLex{
+    private void expIgualPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == EQUAL_EQUAL || type == NOT_EQUAL) {
             opIgual();
@@ -752,7 +716,7 @@ public class Parser {
         }
     }
 
-    private void expCompuesta() throws IOException, ErrorLex{
+    private void expCompuesta() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expAd();
@@ -762,7 +726,7 @@ public class Parser {
         }
     }
 
-    private void expCompuestaPr() throws IOException, ErrorLex{
+    private void expCompuestaPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
             opCompuesta();
@@ -776,7 +740,7 @@ public class Parser {
         }
     }
 
-    private void expAd() throws IOException, ErrorLex{
+    private void expAd() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expMul();
@@ -786,7 +750,7 @@ public class Parser {
         }
     }
 
-    private void expAdPr() throws IOException, ErrorLex{
+    private void expAdPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == PLUS || type == MINUS) {
             opAd();
@@ -801,7 +765,7 @@ public class Parser {
         }
     }
 
-    private void expMul() throws IOException, ErrorLex{
+    private void expMul() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expUn();
@@ -811,7 +775,7 @@ public class Parser {
         }
     }
 
-    private void expMulPr() throws IOException, ErrorLex{
+    private void expMulPr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == MULT || type == SLASH || type == DIV || type == PERCENTAGE) {
             opMul();
@@ -826,7 +790,7 @@ public class Parser {
         }
     }
 
-    private void expUn() throws IOException, ErrorLex{
+    private void expUn() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if (type == LEFT_PAREN) {
             peekToken();
@@ -850,7 +814,7 @@ public class Parser {
         }
     }
 
-    private void opIgual() throws IOException, ErrorLex{
+    private void opIgual() throws IOException, ErrorTiny{
         if (currentToken.getType() == EQUAL_EQUAL){
             macheo(EQUAL_EQUAL);
         }else {
@@ -862,7 +826,7 @@ public class Parser {
         }
     }
 
-    private void opAd() throws IOException, ErrorLex{
+    private void opAd() throws IOException, ErrorTiny{
         if (currentToken.getType() == PLUS){
             macheo(PLUS);
         }else {
@@ -874,7 +838,7 @@ public class Parser {
         }
     }
 
-    private void opCompuesta() throws IOException, ErrorLex{
+    private void opCompuesta() throws IOException, ErrorTiny{
         if (currentToken.getType() == GREATER){
             macheo(GREATER);
         }else {
@@ -894,7 +858,7 @@ public class Parser {
         }
     }
 
-    private void opUnario() throws IOException, ErrorLex{
+    private void opUnario() throws IOException, ErrorTiny{
         if (currentToken.getType() == PLUS){
             macheo(PLUS);
         }else {
@@ -924,7 +888,7 @@ public class Parser {
         }
     }
 
-    private void opMul() throws IOException, ErrorLex{
+    private void opMul() throws IOException, ErrorTiny{
         if (currentToken.getType() == MULT){
             macheo(MULT);
         }else {
@@ -944,7 +908,7 @@ public class Parser {
         }
     }
 
-    private void operando() throws IOException, ErrorLex{
+    private void operando() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == LEFT_PAREN  || type == SELF || type == NEW){
             primario();
@@ -958,7 +922,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_factorizado() throws IOException, ErrorLex{
+    private void encadenado_factorizado() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT) {
             encadenado();
@@ -971,7 +935,7 @@ public class Parser {
         }
     }
 
-    private void literal() throws IOException, ErrorLex{
+    private void literal() throws IOException, ErrorTiny{
         if (currentToken.getType() == NIL){
             macheo(NIL);
         }else {
@@ -999,7 +963,7 @@ public class Parser {
         }
     }
 
-    private void primario() throws IOException, ErrorLex{
+    private void primario() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN){
             expresionParentizada();
@@ -1025,7 +989,7 @@ public class Parser {
         }
     }
 
-    private void expresionParentizada() throws IOException, ErrorLex{
+    private void expresionParentizada() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN ) {
             macheo(LEFT_PAREN);
@@ -1037,7 +1001,7 @@ public class Parser {
         }
     }
 
-    private void accesoSelf() throws IOException, ErrorLex{
+    private void accesoSelf() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == SELF ) {
             macheo(SELF);
@@ -1047,7 +1011,7 @@ public class Parser {
         }
     }
 
-    private void accesoVar_pr() throws IOException, ErrorLex{
+    private void accesoVar_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT || type == SEMICOLON || type == COMMA  || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == DIV || type == PERCENTAGE){
             encadenado_factorizado();
@@ -1063,7 +1027,7 @@ public class Parser {
         }
     }
 
-    private void llamada_metodo() throws IOException, ErrorLex{
+    private void llamada_metodo() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN ) {
             argumentos_actuales();
@@ -1073,7 +1037,7 @@ public class Parser {
         }
     }
 
-    private void llamada_metodo_estatico() throws IOException, ErrorLex{
+    private void llamada_metodo_estatico() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS ) {
             macheo(IDCLASS);
@@ -1086,7 +1050,7 @@ public class Parser {
         }
     }
 
-    private void llamada_conclasor() throws IOException, ErrorLex{
+    private void llamada_conclasor() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == NEW ) {
             macheo(NEW);
@@ -1096,7 +1060,7 @@ public class Parser {
         }
     }
 
-    private void llamada_conclasor_pr() throws IOException, ErrorLex{
+    private void llamada_conclasor_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS){
             macheo(IDCLASS);
@@ -1114,7 +1078,7 @@ public class Parser {
         }
     }
 
-    private void argumentos_actuales() throws IOException, ErrorLex{
+    private void argumentos_actuales() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN) {
             macheo(LEFT_PAREN);
@@ -1125,7 +1089,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones_factorizado() throws IOException, ErrorLex{
+    private void lista_expresiones_factorizado() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
             lista_expresiones();
@@ -1138,7 +1102,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones() throws IOException, ErrorLex{
+    private void lista_expresiones() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
             expOr();
@@ -1148,7 +1112,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones_pr() throws IOException, ErrorLex{
+    private void lista_expresiones_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == COMMA) {
             macheo(COMMA);
@@ -1162,7 +1126,7 @@ public class Parser {
         }
     }
 
-    private void encadenado() throws IOException, ErrorLex{
+    private void encadenado() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT) {
             macheo(DOT);
@@ -1172,7 +1136,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_pr() throws IOException, ErrorLex{
+    private void encadenado_pr() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == IDOBJETS) {
             macheo(IDOBJETS);
@@ -1182,7 +1146,7 @@ public class Parser {
         }
     }
 
-    private void id_factor() throws IOException, ErrorLex{
+    private void id_factor() throws IOException, ErrorTiny{
         TokenType type = currentToken.getType();
         if(type == DOT || type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == LEFT_BRACKET || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == LESS || type == GREATER || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV ) {
             accesoVar_pr();
