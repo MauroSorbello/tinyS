@@ -38,6 +38,7 @@ public class Parser {
 
     //Leer token sin consumirlo
     private void peekToken() throws IOException, ErrorLex {
+
         if (!hasLookahead) {
             lookaheadToken = escaner.nextToken();
             hasLookahead = true;
@@ -324,7 +325,9 @@ public class Parser {
         }
     }
 // Corroborar id
+
     private void sentencia_bloque_recursivo() throws IOException, ErrorLex {
+      
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE || type == SEMICOLON || type == LEFT_PAREN || type== IF || type == WHILE || type == RET || type == IDOBJETS || type == SELF){
             sentencia();
@@ -498,7 +501,9 @@ public class Parser {
         }
     }
 // corroborar asignacion ID
+
     private void sentencia() throws IOException, ErrorLex{
+
         TokenType type = currentToken.getType();
         if(type == IF){
             macheo(IF);
@@ -599,7 +604,9 @@ public class Parser {
         }
     }
 
+
     private void accesoVar_simple() throws IOException, ErrorLex{
+
         TokenType type = currentToken.getType();
         if(type == IDOBJETS){
             macheo(IDOBJETS);
