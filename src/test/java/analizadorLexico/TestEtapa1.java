@@ -1,5 +1,6 @@
 package analizadorLexico;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -56,13 +57,20 @@ public class TestEtapa1 {
     public void testCaracterInvalido() throws IOException, ErrorLex{
         String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
 
-        IOException exception = assertThrows(IOException.class, () -> {
+
+        ErrorLex exception = assertThrows(ErrorLex.class, () -> {
             scan(path); // Esta llamada debe lanzar la excepción
         });
+        String message = exception.getMessage();
+        assertTrue(message.contains("CARACTER INVALIDO _"),
+                "Se esperaba un mensaje que contenga 'CARACTER INVALIDO ' pero fue: " + message);
 
-        String mensaje = exception.getMessage();
-        assertTrue(mensaje.contains("CARACTER INVALIDO"),
-                "Se esperaba un mensaje que contenga 'CARACTER INVALIDO' pero fue: " + mensaje);
+
+
+
+
+
+
     }
     @Test
     public void testComentarios() throws IOException, ErrorLex {

@@ -28,6 +28,6 @@ public class Token {
     }
 
     public String toString() {
-        return "| " +type + " | " + lexema  + " | LINEA " + line + " (COLUMNA" + column + ") |";
+        return "| " +type + " | " + lexema  + " | LINEA " + line + " (COLUMNA " + column + ") |";
     }
 }
