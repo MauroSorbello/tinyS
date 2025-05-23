@@ -23,7 +23,7 @@ public class TestEtapa1 {
     }
 
 
-    private List<Token> scan(String source) throws IOException {
+    private List<Token> scan(String source) throws IOException, ErrorLex {
         LectorCF lector = new LectorCF();
         Escaner escaner = new Escaner();
         escaner.setEscaner(lector);
@@ -31,15 +31,24 @@ public class TestEtapa1 {
         String buffer = lector.rechargeBuffer();
         escaner.setBuffer(buffer);
 
-
         List<Token> tokens = new ArrayList<>();
         Token tokenActual;
         do {
             tokenActual = escaner.nextToken();
-            tokens.add(tokenActual);
-        } while (tokenActual.getType() != TokenType.EOF);
+            if (tokenActual != null) {
+                tokens.add(tokenActual);
+                if (tokenActual.getType() == TokenType.EOF) {
+                    break;
+                }
+            } else {
+                // Manejar el caso en que tokenActual es nulo
+                //System.err.println("Error: tokenActual es nulo");
+                break; // Salir del bucle si no se puede obtener un token válido
+            }
+        } while (true);
         return tokens;
     }
+
 
 
 
@@ -48,7 +57,7 @@ public class TestEtapa1 {
     public void testCaracterInvalido() {
         String path = "/home/nacho/IdeaProjects/tinyS/src/test/resources/lexicalTest/identificadoresErroneos.s";
 
-        IOException exception = assertThrows(IOException.class, () -> {
+        ErrorLex exception = assertThrows(ErrorLex.class, () -> {
             scan(path); // Esta llamada debe lanzar la excepción
         });
 
@@ -57,7 +66,7 @@ public class TestEtapa1 {
                 "Se esperaba un mensaje que contenga 'CARACTER INVALIDO' pero fue: " + mensaje);
     }
     @Test
-    public void testComentarios() throws IOException {
+    public void testComentarios() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.INT,
@@ -109,7 +118,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testBuffer() throws IOException {
+    public void testBuffer() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.IDOBJETS,
@@ -139,7 +148,7 @@ public class TestEtapa1 {
         }
     }
     @Test
-    public void testSecuenciasComplejas() throws IOException {
+    public void testSecuenciasComplejas() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.LEFT_PAREN,
@@ -175,7 +184,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testNumerosPares() throws IOException {
+    public void testNumerosPares() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -340,7 +349,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testContador() throws IOException {
+    public void testContador() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -458,7 +467,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testFactorial() throws IOException {
+    public void testFactorial() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -614,7 +623,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testPrimo() throws IOException {
+    public void testPrimo() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -796,7 +805,7 @@ public class TestEtapa1 {
     }
 
     @Test
-    public void testPalabrasClavesYSignos() throws IOException {
+    public void testPalabrasClavesYSignos() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,
@@ -841,7 +850,7 @@ public class TestEtapa1 {
 
 
     @Test
-    public void testFibonacci() throws IOException {
+    public void testFibonacci() throws IOException, ErrorLex {
 
         List<TokenType> tiposEsperados = Arrays.asList(
                 TokenType.CLASS,

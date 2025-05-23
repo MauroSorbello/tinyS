@@ -24,7 +24,7 @@ public class Parser {
         this.currentToken = currentToken;
     }
 
-    public void macheo(TokenType tokenType) throws IOException {
+    public void macheo(TokenType tokenType) throws IOException, ErrorLex {
         if (currentToken.getType() == tokenType){
             if (hasLookahead) {
                 currentToken = lookaheadToken;
@@ -37,7 +37,7 @@ public class Parser {
     }
 
     //Leer token sin consumirlo
-    private void peekToken() throws IOException {
+    private void peekToken() throws IOException, ErrorLex {
         if (!hasLookahead) {
             lookaheadToken = escaner.nextToken();
             hasLookahead = true;
@@ -91,7 +91,7 @@ public class Parser {
 
     }
 
-    private void class_lista_recursivo() throws IOException {
+    private void class_lista_recursivo() throws IOException, ErrorLex {
         if (currentToken.getType() == CLASS){
             clas();
             lista_factorizacion();
@@ -100,7 +100,7 @@ public class Parser {
         }
     }
 
-    private void impl_lista_recursivo() throws IOException {
+    private void impl_lista_recursivo() throws IOException, ErrorLex {
         if(currentToken.getType()==IMPL){
             impl();
             lista_factorizacion();
@@ -111,7 +111,7 @@ public class Parser {
     }
 
 
-    private void lista_factorizacion() throws IOException {
+    private void lista_factorizacion() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == CLASS ){
             class_lista_recursivo();
@@ -128,7 +128,7 @@ public class Parser {
         }
     }
 
-    private void clas() throws IOException {
+    private void clas() throws IOException, ErrorLex {
         if(currentToken.getType()==CLASS){
             macheo(CLASS);
             macheo(IDCLASS);
@@ -138,7 +138,7 @@ public class Parser {
         }
     }
 
-    private void clas_factorizado() throws IOException {
+    private void clas_factorizado() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE){
             macheo(LEFT_BRACE);
@@ -156,7 +156,7 @@ public class Parser {
         }
     }
 
-    private void atributo_class_recursivo() throws IOException{
+    private void atributo_class_recursivo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
 
         if(type == IDCLASS || type == PUB || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
@@ -171,7 +171,7 @@ public class Parser {
         }
     }
 
-    private void impl() throws IOException {
+    private void impl() throws IOException, ErrorLex {
         if(currentToken.getType() == IMPL){
             macheo(IMPL);
             macheo(IDCLASS);
@@ -184,7 +184,7 @@ public class Parser {
         }
     }
 
-    private void miembro_impl_recursivo() throws IOException {
+    private void miembro_impl_recursivo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == FN || type == ST || type == DOT){
             miembro();
@@ -197,7 +197,7 @@ public class Parser {
             }
         }
     }
-    private void herencia() throws IOException {
+    private void herencia() throws IOException, ErrorLex {
         if(currentToken.getType() == DOBLE_DOT){
             macheo(DOBLE_DOT);
             tipo();
@@ -206,7 +206,7 @@ public class Parser {
         }
     }
 
-    private void miembro() throws IOException {
+    private void miembro() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if (type == FN|| type == ST){
             metodo();
@@ -219,7 +219,7 @@ public class Parser {
         }
     }
 
-    private void constructor() throws IOException {
+    private void constructor() throws IOException, ErrorLex {
         if (currentToken.getType()==DOT){
             macheo(DOT);
             argumentos_formales();
@@ -229,7 +229,7 @@ public class Parser {
         }
     }
 
-    private void atributo() throws IOException {
+    private void atributo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo();
@@ -247,7 +247,7 @@ public class Parser {
         }
     }
 
-    private void metodo() throws IOException {
+    private void metodo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == FN){
             macheo(FN);
@@ -269,7 +269,7 @@ public class Parser {
         }
     }
 
-    private void tipo_metodo_factorizacion() throws IOException {
+    private void tipo_metodo_factorizacion() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == VOID || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY){
             tipo_metodo();
@@ -282,7 +282,7 @@ public class Parser {
         }
     }
 
-    private void visibilidad() throws IOException{
+    private void visibilidad() throws IOException, ErrorLex {
         if (currentToken.getType() == PUB){
             macheo(PUB);
         }else{
@@ -290,7 +290,7 @@ public class Parser {
         }
     }
 
-    private void forma_metodo() throws IOException{
+    private void forma_metodo() throws IOException, ErrorLex {
         if (currentToken.getType() == ST){
             macheo(ST);
         }else{
@@ -298,7 +298,7 @@ public class Parser {
         }
     }
 
-    private void bloque_metodo() throws IOException{
+    private void bloque_metodo() throws IOException, ErrorLex {
         if(currentToken.getType()==LEFT_BRACE){
             macheo(LEFT_BRACE);
             decl_var_loc_bloque_recursivo();
@@ -309,7 +309,7 @@ public class Parser {
         }
     }
 
-    private void decl_var_loc_bloque_recursivo() throws IOException{
+    private void decl_var_loc_bloque_recursivo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
 
         if(type == IDCLASS  || type == STR || type == BOOL || type == INT || type == DOUBLE || type == ARRAY ){
@@ -324,7 +324,7 @@ public class Parser {
         }
     }
 // Corroborar id
-    private void sentencia_bloque_recursivo() throws IOException{
+    private void sentencia_bloque_recursivo() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type == LEFT_BRACE || type == SEMICOLON || type == LEFT_PAREN || type== IF || type == WHILE || type == RET || type == IDOBJETS || type == SELF){
             sentencia();
@@ -338,7 +338,7 @@ public class Parser {
         }
     }
 
-    private void decl_var_locales() throws IOException{
+    private void decl_var_locales() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
@@ -349,7 +349,7 @@ public class Parser {
         }
     }
 
-    private void lista_declaraciones_variables() throws IOException{
+    private void lista_declaraciones_variables() throws IOException, ErrorLex {
         if(currentToken.getType()==IDOBJETS){
             macheo(IDOBJETS);
             lista_declaraciones_variables_Pr();
@@ -358,7 +358,7 @@ public class Parser {
         }
     }
 
-    private void lista_declaraciones_variables_Pr() throws IOException{
+    private void lista_declaraciones_variables_Pr() throws IOException, ErrorLex {
         TokenType type = currentToken.getType();
         if (type == COMMA){
             macheo(COMMA);
@@ -372,7 +372,7 @@ public class Parser {
         }
     }
 
-    private void argumentos_formales() throws IOException{
+    private void argumentos_formales() throws IOException, ErrorLex {
         if(currentToken.getType()==LEFT_PAREN){
             macheo(LEFT_PAREN);
             lista_argumentos_formales_factorizado();
@@ -382,7 +382,7 @@ public class Parser {
         }
     }
 
-    private void lista_argumentos_formales_factorizado() throws IOException{
+    private void lista_argumentos_formales_factorizado() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             lista_argumentos_formales();
@@ -395,7 +395,7 @@ public class Parser {
         }
     }
 
-    private void lista_argumentos_formales() throws IOException{
+    private void lista_argumentos_formales() throws IOException, ErrorLex{
 
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
@@ -406,7 +406,7 @@ public class Parser {
         }
     }
 
-    private void lista_argumentos_formales_pr() throws IOException{
+    private void lista_argumentos_formales_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type==COMMA){
             macheo(COMMA);
@@ -419,7 +419,7 @@ public class Parser {
             }
         }
     }
-    private void argumento_formal() throws IOException{
+    private void argumento_formal() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY ){
             tipo();
@@ -430,7 +430,7 @@ public class Parser {
         }
     }
 
-    private void tipo_metodo() throws IOException{
+    private void tipo_metodo() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type==IDCLASS || type==STR || type==BOOL || type==INT || type==DOUBLE || type==ARRAY){
             tipo();
@@ -444,7 +444,7 @@ public class Parser {
         }
     }
 
-    private void tipo() throws IOException{
+    private void tipo() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == STR || type == BOOL || type == INT || type == DOUBLE){
             tipo_primitivo();
@@ -461,7 +461,7 @@ public class Parser {
         }
     }
 
-    private void tipo_primitivo() throws IOException{
+    private void tipo_primitivo() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type==STR){
             macheo(STR);
@@ -482,7 +482,7 @@ public class Parser {
         }
     }
 
-    private void tipo_referencia() throws IOException{
+    private void tipo_referencia() throws IOException, ErrorLex{
         if(currentToken.getType()==IDCLASS){
             macheo(IDCLASS);
         }else{
@@ -490,7 +490,7 @@ public class Parser {
         }
     }
 
-    private void tipo_arreglo() throws IOException{
+    private void tipo_arreglo() throws IOException, ErrorLex{
         if(currentToken.getType() == ARRAY){
             macheo(ARRAY);
         }else{
@@ -498,7 +498,7 @@ public class Parser {
         }
     }
 // corroborar asignacion ID
-    private void sentencia() throws IOException{
+    private void sentencia() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IF){
             macheo(IF);
@@ -544,7 +544,7 @@ public class Parser {
         }
     }
 
-    private void ExpOr_factorizado() throws IOException{
+    private void ExpOr_factorizado() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if (type==IDCLASS || type==IDOBJETS || type==PLUS || type==MINUS || type==NOT || type==PLUS_PLUS || type==MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == DOUBLE_LITERAL || type == STRING_LITERAL || type==SELF || type == NEW || type == LEFT_PAREN){
             expOr();
@@ -556,8 +556,8 @@ public class Parser {
             }
         }
     }
-//////////////////////////////ARREGLAR///////////////////////////////////////////////////////////////////////
-    private void sentencia_else()throws IOException{
+
+    private void sentencia_else()throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == ELSE){
             macheo(ELSE);
@@ -571,7 +571,7 @@ public class Parser {
         }
     }
 
-    private void bloque() throws IOException{
+    private void bloque() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if (type == LEFT_BRACE){
             macheo(LEFT_BRACE);
@@ -582,7 +582,7 @@ public class Parser {
         }
     }
 
-    private void asignacion() throws IOException{
+    private void asignacion() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDOBJETS ){
             accesoVar_simple();
@@ -599,7 +599,7 @@ public class Parser {
         }
     }
 
-    private void accesoVar_simple() throws IOException{
+    private void accesoVar_simple() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDOBJETS){
             macheo(IDOBJETS);
@@ -614,7 +614,7 @@ public class Parser {
         }
     }
 
-    private void accesoVar_simple_pr() throws IOException{
+    private void accesoVar_simple_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT || type == EQUAL){
             encadenado_simple_recursivo();
@@ -629,7 +629,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_simple_recursivo() throws IOException{
+    private void encadenado_simple_recursivo() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT){
             accesoVar_simple();
@@ -643,7 +643,7 @@ public class Parser {
         }
     }
 
-    private void accesoSelf_simple() throws IOException{
+    private void accesoSelf_simple() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == SELF){
             macheo(SELF);
@@ -653,7 +653,7 @@ public class Parser {
         }
     }
 
-    private void encadeado_simple() throws IOException{
+    private void encadeado_simple() throws IOException, ErrorLex{
         if(currentToken.getType() == DOT){
             macheo(DOT);
             macheo(IDOBJETS);
@@ -662,7 +662,7 @@ public class Parser {
         }
     }
 
-    private void sentencia_simple() throws IOException{
+    private void sentencia_simple() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN){
             macheo(LEFT_PAREN);
@@ -673,7 +673,7 @@ public class Parser {
         }
     }
 
-    private void expOr() throws IOException{
+    private void expOr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expAnd();
@@ -683,7 +683,7 @@ public class Parser {
         }
     }
 
-    private void expOrPr() throws IOException{
+    private void expOrPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == OR) {
             expAnd();
@@ -697,7 +697,7 @@ public class Parser {
         }
     }
 
-    private void expAnd() throws IOException{
+    private void expAnd() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expIgual();
@@ -707,7 +707,7 @@ public class Parser {
         }
     }
 
-    private void expAndPr() throws IOException{
+    private void expAndPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == AND) {
             expIgual();
@@ -720,7 +720,7 @@ public class Parser {
         }
     }
 
-    private void expIgual() throws IOException{
+    private void expIgual() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expCompuesta();
@@ -730,7 +730,7 @@ public class Parser {
         }
     }
 
-    private void expIgualPr() throws IOException{
+    private void expIgualPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == EQUAL_EQUAL || type == NOT_EQUAL) {
             opIgual();
@@ -745,7 +745,7 @@ public class Parser {
         }
     }
 
-    private void expCompuesta() throws IOException{
+    private void expCompuesta() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expAd();
@@ -755,7 +755,7 @@ public class Parser {
         }
     }
 
-    private void expCompuestaPr() throws IOException{
+    private void expCompuestaPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL) {
             opCompuesta();
@@ -769,7 +769,7 @@ public class Parser {
         }
     }
 
-    private void expAd() throws IOException{
+    private void expAd() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expMul();
@@ -779,7 +779,7 @@ public class Parser {
         }
     }
 
-    private void expAdPr() throws IOException{
+    private void expAdPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == PLUS || type == MINUS) {
             opAd();
@@ -794,7 +794,7 @@ public class Parser {
         }
     }
 
-    private void expMul() throws IOException{
+    private void expMul() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == LEFT_PAREN || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == SELF || type == NEW){
             expUn();
@@ -804,7 +804,7 @@ public class Parser {
         }
     }
 
-    private void expMulPr() throws IOException{
+    private void expMulPr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == MULT || type == SLASH || type == DIV || type == PERCENTAGE) {
             opMul();
@@ -819,7 +819,7 @@ public class Parser {
         }
     }
 
-    private void expUn() throws IOException{
+    private void expUn() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if (type == LEFT_PAREN) {
             peekToken();
@@ -843,7 +843,7 @@ public class Parser {
         }
     }
 
-    private void opIgual() throws IOException{
+    private void opIgual() throws IOException, ErrorLex{
         if (currentToken.getType() == EQUAL_EQUAL){
             macheo(EQUAL_EQUAL);
         }else {
@@ -855,7 +855,7 @@ public class Parser {
         }
     }
 
-    private void opAd() throws IOException{
+    private void opAd() throws IOException, ErrorLex{
         if (currentToken.getType() == PLUS){
             macheo(PLUS);
         }else {
@@ -867,7 +867,7 @@ public class Parser {
         }
     }
 
-    private void opCompuesta() throws IOException{
+    private void opCompuesta() throws IOException, ErrorLex{
         if (currentToken.getType() == GREATER){
             macheo(GREATER);
         }else {
@@ -887,7 +887,7 @@ public class Parser {
         }
     }
 
-    private void opUnario() throws IOException{
+    private void opUnario() throws IOException, ErrorLex{
         if (currentToken.getType() == PLUS){
             macheo(PLUS);
         }else {
@@ -917,7 +917,7 @@ public class Parser {
         }
     }
 
-    private void opMul() throws IOException{
+    private void opMul() throws IOException, ErrorLex{
         if (currentToken.getType() == MULT){
             macheo(MULT);
         }else {
@@ -937,7 +937,7 @@ public class Parser {
         }
     }
 
-    private void operando() throws IOException{
+    private void operando() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == LEFT_PAREN  || type == SELF || type == NEW){
             primario();
@@ -951,7 +951,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_factorizado() throws IOException{
+    private void encadenado_factorizado() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT) {
             encadenado();
@@ -964,7 +964,7 @@ public class Parser {
         }
     }
 
-    private void literal() throws IOException{
+    private void literal() throws IOException, ErrorLex{
         if (currentToken.getType() == NIL){
             macheo(NIL);
         }else {
@@ -992,7 +992,7 @@ public class Parser {
         }
     }
 
-    private void primario() throws IOException{
+    private void primario() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN){
             expresionParentizada();
@@ -1018,7 +1018,7 @@ public class Parser {
         }
     }
 
-    private void expresionParentizada() throws IOException{
+    private void expresionParentizada() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN ) {
             macheo(LEFT_PAREN);
@@ -1030,7 +1030,7 @@ public class Parser {
         }
     }
 
-    private void accesoSelf() throws IOException{
+    private void accesoSelf() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == SELF ) {
             macheo(SELF);
@@ -1040,7 +1040,7 @@ public class Parser {
         }
     }
 
-    private void accesoVar_pr() throws IOException{
+    private void accesoVar_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT || type == SEMICOLON || type == COMMA  || type == RIGHT_PAREN || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == GREATER || type == LESS || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == DIV || type == PERCENTAGE){
             encadenado_factorizado();
@@ -1056,7 +1056,7 @@ public class Parser {
         }
     }
 
-    private void llamada_metodo() throws IOException{
+    private void llamada_metodo() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN ) {
             argumentos_actuales();
@@ -1066,7 +1066,7 @@ public class Parser {
         }
     }
 
-    private void llamada_metodo_estatico() throws IOException{
+    private void llamada_metodo_estatico() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS ) {
             macheo(IDCLASS);
@@ -1079,7 +1079,7 @@ public class Parser {
         }
     }
 
-    private void llamada_conclasor() throws IOException{
+    private void llamada_conclasor() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == NEW ) {
             macheo(NEW);
@@ -1089,7 +1089,7 @@ public class Parser {
         }
     }
 
-    private void llamada_conclasor_pr() throws IOException{
+    private void llamada_conclasor_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS){
             macheo(IDCLASS);
@@ -1107,7 +1107,7 @@ public class Parser {
         }
     }
 
-    private void argumentos_actuales() throws IOException{
+    private void argumentos_actuales() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == LEFT_PAREN) {
             macheo(LEFT_PAREN);
@@ -1118,7 +1118,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones_factorizado() throws IOException{
+    private void lista_expresiones_factorizado() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
             lista_expresiones();
@@ -1131,7 +1131,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones() throws IOException{
+    private void lista_expresiones() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDCLASS || type == IDOBJETS || type == PLUS || type == MINUS || type == NOT || type == PLUS_PLUS || type == MINUS_MINUS || type == NIL || type == TRUE || type == FALSE || type == INTEGER_LITERAL || type == STRING_LITERAL || type == DOUBLE_LITERAL || type == LEFT_PAREN || type == SELF || type == NEW) {
             expOr();
@@ -1141,7 +1141,7 @@ public class Parser {
         }
     }
 
-    private void lista_expresiones_pr() throws IOException{
+    private void lista_expresiones_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == COMMA) {
             macheo(COMMA);
@@ -1155,7 +1155,7 @@ public class Parser {
         }
     }
 
-    private void encadenado() throws IOException{
+    private void encadenado() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT) {
             macheo(DOT);
@@ -1165,7 +1165,7 @@ public class Parser {
         }
     }
 
-    private void encadenado_pr() throws IOException{
+    private void encadenado_pr() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == IDOBJETS) {
             macheo(IDOBJETS);
@@ -1175,7 +1175,7 @@ public class Parser {
         }
     }
 
-    private void id_factor() throws IOException{
+    private void id_factor() throws IOException, ErrorLex{
         TokenType type = currentToken.getType();
         if(type == DOT || type == SEMICOLON || type == COMMA || type == RIGHT_PAREN || type == LEFT_BRACKET || type == RIGHT_BRACKET || type == OR || type == AND || type == EQUAL_EQUAL || type == NOT_EQUAL || type == LESS || type == GREATER || type == GREATER_EQUAL || type == LESS_EQUAL || type == PLUS || type == MINUS || type == MULT || type == SLASH || type == PERCENTAGE || type == DIV ) {
             accesoVar_pr();
