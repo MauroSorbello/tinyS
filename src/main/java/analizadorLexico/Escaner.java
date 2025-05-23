@@ -13,7 +13,7 @@ public class Escaner {
 
     private int start = 0;
     private int current = 0;
-    private int line = 0;
+    private int line = 1;
     private int column = 0;
 
     private static final Map<String, TokenType> keywords;
@@ -175,7 +175,6 @@ public class Escaner {
                     //Pasamos de largo el comentario
                     while (look() != '\n' && !isAtEnd()) advance();
                     column = 0;
-                    line = line + 1;
                     return nextToken();
                 } else {
                     if (nextMatch('*')) {
